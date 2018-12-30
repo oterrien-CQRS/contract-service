@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: server
+    name: contract-domain-service
   cloud:
     consul:
       host: 192.168.99.100
@@ -11,9 +11,9 @@ spring:
       config:
         enabled: true
       discovery:
-        preferIpAddress: true
-        tags: "urlprefix-/server/ strip=/server" # to define route from "server" path by removing "server" once redirected
         enabled: true
+        preferIpAddress: true
+        tags: "urlprefix-/contract/ strip=/contract" # to define route for "/contract" path when calling LB and remove "/server" once redirected
         instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
         healthCheckPath: /actuator/health
         healthCheckInterval: 5ms

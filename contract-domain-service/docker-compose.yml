@@ -1,0 +1,19 @@
+version: "3.3"
+
+services:
+
+  server1: &server
+    image: oterrien/contract-domain-service:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - my-network
+
+  server2:
+    <<: *server
+    ports:
+      - "8081:8080"
+
+networks:
+  my-network:
+    external: true

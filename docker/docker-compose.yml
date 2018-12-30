@@ -2,37 +2,10 @@ version: "3.3"
 
 services:
 
-
-  #  zookeeper:
-  #    image: confluentinc/cp-zookeeper:latest
-  #    environment:
-  #      ZOOKEEPER_CLIENT_PORT: 32181
-  #      ZOOKEEPER_TICK_TIME: 2000
-  #    ports:
-  #      - "32181:32181"
-  #    deploy:
-  #      replicas: 1
-  #
-  #  kafka:
-  #    image: confluentinc/cp-kafka:latest
-  #    environment:
-  #      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka1:19092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-192.168.99.100}:9092
-  #      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
-  #      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-  #      KAFKA_BROKER_ID: 1
-  #      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  #      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
-  #      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
-  #    ports:
-  #      - "29092:29092"
-  #    deploy:
-  #      replicas: 1
-  #    depends_on:
-  #      - zookeeper
-  #
-
   consul-agent-1: &consul-agent
     image: consul:latest
+    networks:
+      - my-network
     command: "agent -retry-join consul-server-bootstrap -client 0.0.0.0"
 
   consul-agent-2:
@@ -64,17 +37,11 @@ services:
       - "9999:9999" # HTTP exposed
     volumes:
       - //c/Users/data/docker/fabio:/etc/fabio
+    networks:
+      - my-network
     depends_on:
       - "consul-server-bootstrap"
 
-  server1: &server
-    image: oterrien/contract-lifecycle-service:latest
-    ports:
-      - "8080:8080"
-    depends_on:
-      - "fabio"
-
-  server2:
-    <<: *server
-    ports:
-      - "8081:8080"
+networks:
+  my-network:
+    external: true
