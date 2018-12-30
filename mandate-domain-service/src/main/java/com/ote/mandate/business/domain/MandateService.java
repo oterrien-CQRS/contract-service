@@ -12,7 +12,8 @@ import com.ote.mandate.business.model.event.MandateCreatedEvent;
 import com.ote.mandate.business.model.event.MandateHeirAddedEvent;
 import com.ote.mandate.business.model.event.MandateMainHeirDefinedEvent;
 import com.ote.mandate.business.model.event.MandateNotaryDefinedEvent;
-import com.ote.mandate.business.spi.IEventRepository;
+import com.ote.mandate.business.spi.IEventObservable;
+import com.ote.mandate.business.spi.IEventPublisher;
 import com.ote.mandate.business.spi.IMandateRepository;
 
 import java.util.List;
@@ -21,18 +22,18 @@ import java.util.stream.Collectors;
 
 class MandateService implements IMandateService {
 
-    private final IEventRepository eventRepository;
+    private final IEventPublisher eventPublisher;
     private final IMandateRepository mandateRepository;
 
-    MandateService(IEventRepository eventRepository, IMandateRepository mandateRepository) {
-        this.eventRepository = eventRepository;
+    MandateService(IEventPublisher eventPublisher, IEventObservable eventObservable, IMandateRepository mandateRepository) {
+        this.eventPublisher = eventPublisher;
         this.mandateRepository = mandateRepository;
 
         // Event Subscription
-        eventRepository.subscribe(MandateCreatedEvent.class, this::handle);
-        eventRepository.subscribe(MandateHeirAddedEvent.class, this::handle);
-        eventRepository.subscribe(MandateMainHeirDefinedEvent.class, this::handle);
-        eventRepository.subscribe(MandateNotaryDefinedEvent.class, this::handle);
+        eventObservable.subscribe(MandateCreatedEvent.class, this::handle);
+        eventObservable.subscribe(MandateHeirAddedEvent.class, this::handle);
+        eventObservable.subscribe(MandateMainHeirDefinedEvent.class, this::handle);
+        eventObservable.subscribe(MandateNotaryDefinedEvent.class, this::handle);
     }
 
     @Override
@@ -54,7 +55,7 @@ class MandateService implements IMandateService {
         if (!command.getOtherHeirs().isEmpty()) {
             event.getOtherHeirs().addAll(command.getOtherHeirs());
         }
-        eventRepository.storeAndPublish(event);
+        eventPublisher.storeAndPublish(event);
     }
 
     @Override
@@ -74,7 +75,7 @@ class MandateService implements IMandateService {
 
         heirsNotYetPresent.forEach(p -> {
             MandateHeirAddedEvent event = new MandateHeirAddedEvent(id, p);
-            eventRepository.storeAndPublish(event);
+            eventPublisher.storeAndPublish(event);
         });
     }
 
@@ -89,7 +90,7 @@ class MandateService implements IMandateService {
         }
 
         MandateMainHeirDefinedEvent event = new MandateMainHeirDefinedEvent(id, command.getMainHeir());
-        eventRepository.storeAndPublish(event);
+        eventPublisher.storeAndPublish(event);
     }
 
     @Override
@@ -103,7 +104,7 @@ class MandateService implements IMandateService {
         }
 
         MandateNotaryDefinedEvent event = new MandateNotaryDefinedEvent(id, command.getNotary());
-        eventRepository.storeAndPublish(event);
+        eventPublisher.storeAndPublish(event);
     }
 
     private Mandate getMandateIfExists(String id) throws MandateNotYetCreatedException {
