@@ -1,11 +1,10 @@
 package com.ote.mandate.business.model.command;
 
-import com.ote.framework.ICommand;
-import com.ote.mandate.business.model.Notary;
+import com.ote.mandate.business.model.aggregate.Notary;
 import lombok.Getter;
 
 @Getter
-public class DefineNotaryCommand extends BaseMandateCommand implements ICommand {
+public class DefineNotaryCommand extends BaseMandateCommand {
 
     private final Notary notary;
 

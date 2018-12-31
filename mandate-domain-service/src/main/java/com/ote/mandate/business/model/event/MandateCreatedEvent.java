@@ -1,9 +1,8 @@
 package com.ote.mandate.business.model.event;
 
-import com.ote.framework.IEvent;
-import com.ote.mandate.business.model.Contractor;
-import com.ote.mandate.business.model.Heir;
-import com.ote.mandate.business.model.Notary;
+import com.ote.mandate.business.model.aggregate.Contractor;
+import com.ote.mandate.business.model.aggregate.Heir;
+import com.ote.mandate.business.model.aggregate.Notary;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -13,7 +12,7 @@ import java.util.List;
 
 @Getter
 @ToString(callSuper = true)
-public class MandateCreatedEvent extends BaseMandateEvent implements IEvent {
+public class MandateCreatedEvent extends BaseMandateEvent {
 
     private final String bankName;
 

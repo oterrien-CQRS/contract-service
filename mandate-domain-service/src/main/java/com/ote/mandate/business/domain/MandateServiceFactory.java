@@ -1,13 +1,11 @@
 package com.ote.mandate.business.domain;
 
-import com.ote.mandate.business.api.IMandateService;
-import com.ote.mandate.business.spi.IEventObservable;
-import com.ote.mandate.business.spi.IEventPublisher;
-import com.ote.mandate.business.spi.IMandateRepository;
+import com.ote.mandate.business.api.IMandateCommandService;
+import com.ote.mandate.business.spi.IEventRepository;
 
 public class MandateServiceFactory {
 
-    public IMandateService createService(IEventPublisher eventPublisher, IEventObservable eventObservable, IMandateRepository mandateRepository) {
-        return new MandateService(eventPublisher, eventObservable, mandateRepository);
+    public IMandateCommandService createService(IEventRepository eventRepository) {
+        return new MandateCommandService(eventRepository);
     }
 }

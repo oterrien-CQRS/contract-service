@@ -1,15 +1,14 @@
 package com.ote.mandate.business.model.command;
 
-import com.ote.framework.ICommand;
-import com.ote.mandate.business.model.Contractor;
-import com.ote.mandate.business.model.Heir;
-import com.ote.mandate.business.model.Notary;
+import com.ote.mandate.business.model.aggregate.Contractor;
+import com.ote.mandate.business.model.aggregate.Heir;
+import com.ote.mandate.business.model.aggregate.Notary;
 import lombok.Getter;
 
 import java.util.List;
 
 @Getter
-public class CreateMandateCommand extends BaseMandateCommand implements ICommand {
+public class CreateMandateCommand extends BaseMandateCommand {
 
     private final String bankName;
     private final Contractor contractor;

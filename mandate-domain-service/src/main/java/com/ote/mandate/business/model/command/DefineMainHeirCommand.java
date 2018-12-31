@@ -1,11 +1,10 @@
 package com.ote.mandate.business.model.command;
 
-import com.ote.framework.ICommand;
-import com.ote.mandate.business.model.Heir;
+import com.ote.mandate.business.model.aggregate.Heir;
 import lombok.Getter;
 
 @Getter
-public class DefineMainHeirCommand extends BaseMandateCommand implements ICommand {
+public class DefineMainHeirCommand extends BaseMandateCommand {
 
     private Heir mainHeir;
 

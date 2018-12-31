@@ -1,4 +1,4 @@
-package com.ote.mandate.business.model;
+package com.ote.mandate.business.model.aggregate;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

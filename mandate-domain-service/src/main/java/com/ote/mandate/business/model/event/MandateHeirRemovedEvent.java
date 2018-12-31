@@ -6,11 +6,11 @@ import lombok.ToString;
 
 @Getter
 @ToString(callSuper = true)
-public class MandateMainHeirDefinedEvent extends BaseMandateEvent {
+public class MandateHeirRemovedEvent extends BaseMandateEvent {
 
     private final Heir heir;
 
-    public MandateMainHeirDefinedEvent(String id, Heir heir) {
+    public MandateHeirRemovedEvent(String id, Heir heir) {
         super(id);
         this.heir = heir;
     }
