@@ -1,6 +1,6 @@
 package com.ote.framework;
 
-public interface IEvent {
+public interface IEvent extends Validable {
 
     String getId();
 }

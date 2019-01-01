@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public final class EventHandlers {
+public final class EventHandlers implements AutoCloseable {
 
     private final Map<String, IEventHandler> eventHandlers = new HashMap<>();
 
@@ -28,6 +28,11 @@ public final class EventHandlers {
         } catch (LambdaException e) {
             throw (Exception) e.getCause();
         }
+    }
+
+    @Override
+    public void close() {
+        eventHandlers.clear();
     }
 
     private static class MissingEventBindingException extends RuntimeException {

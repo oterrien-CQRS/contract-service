@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,8 +16,10 @@ import java.util.List;
 @ToString(callSuper = true)
 public class MandateCreatedEvent extends BaseMandateEvent {
 
+    @NotBlank
     private final String bankName;
 
+    @NotNull
     private final Contractor contractor;
 
     @Setter
