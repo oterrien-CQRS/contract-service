@@ -11,7 +11,6 @@
 
     <artifactId>contract-domain-service</artifactId>
 
-
     <properties>
         <spring-boot-version>2.1.1.RELEASE</spring-boot-version>
         <spring-cloud-version>Greenwich.M3</spring-cloud-version>

@@ -1,25 +1,25 @@
 package com.ote.mandate.business.model.aggregate;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
 
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Data
 public class Mandate {
 
     @NotBlank
-    private final String id;
+    private String id;
 
     @NotBlank
     private String bankName;
 
     @NotNull
+    @Valid
     private Contractor contractor;
 
     @Valid
@@ -29,5 +29,11 @@ public class Mandate {
     private Heir mainHeir;
 
     @Valid
-    private final List<Heir> otherHeirs = new ArrayList<>();
+    private List<Heir> otherHeirs;
+
+    public Mandate(String id, String bankName, Contractor contractor) {
+        this.id = id;
+        this.bankName = bankName;
+        this.contractor = contractor;
+    }
 }

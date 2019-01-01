@@ -9,10 +9,14 @@ import com.ote.mandate.business.model.aggregate.MandateProjector;
 import com.ote.mandate.business.model.command.*;
 import com.ote.mandate.business.model.event.*;
 import com.ote.mandate.business.spi.IEventRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+@Slf4j
 class MandateCommandService implements IMandateCommandService {
 
     private final IEventRepository eventRepository;
@@ -24,9 +28,11 @@ class MandateCommandService implements IMandateCommandService {
     @Override
     public void apply(CreateMandateCommand command) throws MandateAlreadyCreatedException {
 
+        log.debug("Trying to apply command : " + command);
+
         String id = command.getId();
 
-        if (eventRepository.findAll(id) != null) {
+        if (CollectionUtils.isNotEmpty(eventRepository.findAll(id))) {
             throw new MandateAlreadyCreatedException(id);
         }
 
@@ -43,18 +49,31 @@ class MandateCommandService implements IMandateCommandService {
     @Override
     public void apply(AddHeirCommand command) throws MandateNotYetCreatedException {
         try {
+            log.debug("Trying to apply command : " + command);
+
             String id = command.getId();
+
             List<IEvent> allEvents = eventRepository.findAll(id);
+            if (CollectionUtils.isEmpty(allEvents)) {
+                throw new MandateNotYetCreatedException(id);
+            }
+
             // Apply events to create latest state of mandate
             try (MandateProjector mandateProjector = new MandateProjector()) {
                 Mandate mandate = mandateProjector.project(allEvents);
                 // Generate a MandateHeirAddedEvent only for heirs which are not yet added
+                AtomicBoolean areElementsProcessed = new AtomicBoolean(false);
                 command.getOtherHeirs().stream().
                         filter(heir -> !mandate.getOtherHeirs().contains(heir)).
+                        peek(heir -> areElementsProcessed.set(true)).
                         forEach(heir -> {
                             MandateHeirAddedEvent event = new MandateHeirAddedEvent(id, heir);
                             eventRepository.storeAndPublish(event);
                         });
+
+                if (!areElementsProcessed.get()) {
+                    log.debug("All these heirs have already been added to mandate {}", id);
+                }
             }
         } catch (MandateNotYetCreatedException e) {
             throw e;
@@ -66,18 +85,31 @@ class MandateCommandService implements IMandateCommandService {
     @Override
     public void apply(RemoveHeirCommand command) throws MandateNotYetCreatedException {
         try {
+            log.debug("Trying to apply command : " + command);
+
             String id = command.getId();
+
             List<IEvent> allEvents = eventRepository.findAll(id);
+            if (CollectionUtils.isEmpty(allEvents)) {
+                throw new MandateNotYetCreatedException(id);
+            }
+
             // Apply events to create latest state of mandate
             try (MandateProjector mandateProjector = new MandateProjector()) {
                 Mandate mandate = mandateProjector.project(allEvents);
                 // Generate a MandateHeirRemovedEvent only for heirs which are not yet removed
+                AtomicBoolean areElementsProcessed = new AtomicBoolean(false);
                 command.getOtherHeirs().stream().
                         filter(heir -> mandate.getOtherHeirs().contains(heir)).
+                        peek(heir -> areElementsProcessed.set(true)).
                         forEach(heir -> {
                             MandateHeirRemovedEvent event = new MandateHeirRemovedEvent(id, heir);
                             eventRepository.storeAndPublish(event);
                         });
+
+                if (!areElementsProcessed.get()) {
+                    log.debug("All these heirs have already been added to mandate {}", id);
+                }
             }
         } catch (MandateNotYetCreatedException e) {
             throw e;
@@ -89,8 +121,15 @@ class MandateCommandService implements IMandateCommandService {
     @Override
     public void apply(DefineMainHeirCommand command) throws MandateNotYetCreatedException {
         try {
+            log.debug("Trying to apply command : " + command);
+
             String id = command.getId();
+
             List<IEvent> allEvents = eventRepository.findAll(id);
+            if (CollectionUtils.isEmpty(allEvents)) {
+                throw new MandateNotYetCreatedException(id);
+            }
+
             // Apply events to create latest state of mandate
             try (MandateProjector mandateProjector = new MandateProjector()) {
                 Mandate mandate = mandateProjector.project(allEvents);
@@ -98,6 +137,8 @@ class MandateCommandService implements IMandateCommandService {
                 if (!Objects.equals(mandate.getMainHeir(), command.getMainHeir())) {
                     MandateMainHeirDefinedEvent event = new MandateMainHeirDefinedEvent(id, command.getMainHeir());
                     eventRepository.storeAndPublish(event);
+                } else {
+                    log.debug("This heir is already defined as main for mandate {}", id);
                 }
             }
         } catch (MandateNotYetCreatedException e) {
@@ -110,8 +151,15 @@ class MandateCommandService implements IMandateCommandService {
     @Override
     public void apply(DefineNotaryCommand command) throws MandateNotYetCreatedException {
         try {
+            log.debug("Trying to apply command : " + command);
+
             String id = command.getId();
+
             List<IEvent> allEvents = eventRepository.findAll(id);
+            if (CollectionUtils.isEmpty(allEvents)) {
+                throw new MandateNotYetCreatedException(id);
+            }
+
             // Apply events to project to  mandate
             try (MandateProjector mandateProjector = new MandateProjector()) {
                 Mandate mandate = mandateProjector.project(allEvents);
@@ -119,6 +167,8 @@ class MandateCommandService implements IMandateCommandService {
                 if (!Objects.equals(mandate.getNotary(), command.getNotary())) {
                     MandateNotaryDefinedEvent event = new MandateNotaryDefinedEvent(id, command.getNotary());
                     eventRepository.storeAndPublish(event);
+                } else {
+                    log.debug("This notary is already defined as main for mandate {}", id);
                 }
             }
         } catch (MandateNotYetCreatedException e) {

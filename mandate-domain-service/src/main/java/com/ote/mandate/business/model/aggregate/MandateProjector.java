@@ -7,6 +7,7 @@ import com.ote.mandate.business.exception.MandateAlreadyCreatedException;
 import com.ote.mandate.business.exception.MandateNotYetCreatedException;
 import com.ote.mandate.business.model.event.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class MandateProjector implements IProjector<Mandate> {
@@ -27,7 +28,11 @@ public final class MandateProjector implements IProjector<Mandate> {
     public Mandate project(List<IEvent> events) throws Exception {
 
         mandate = null;
-        eventHandlers.handle(events);
+
+        if (events != null) {
+            eventHandlers.handle(events.toArray(new IEvent[0]));
+        }
+
         return mandate;
     }
 
@@ -37,18 +42,23 @@ public final class MandateProjector implements IProjector<Mandate> {
             throw new MandateAlreadyCreatedException(event.getId());
         }
 
-        mandate = new Mandate(event.getId());
+        mandate = new Mandate();
+        mandate.setId(event.getId());
         mandate.setBankName(event.getBankName());
         mandate.setContractor(event.getContractor());
         mandate.setNotary(event.getNotary());
         mandate.setMainHeir(event.getMainHeir());
-        mandate.getOtherHeirs().addAll(event.getOtherHeirs());
+        mandate.setOtherHeirs(event.getOtherHeirs());
     }
 
     private void handle(MandateHeirAddedEvent event) throws MandateNotYetCreatedException {
 
         if (mandate == null) {
             throw new MandateNotYetCreatedException(event.getId());
+        }
+
+        if (mandate.getOtherHeirs() == null) {
+            mandate.setOtherHeirs(new ArrayList<>());
         }
 
         mandate.getOtherHeirs().add(event.getHeir());
@@ -58,6 +68,10 @@ public final class MandateProjector implements IProjector<Mandate> {
 
         if (mandate == null) {
             throw new MandateNotYetCreatedException(event.getId());
+        }
+
+        if (mandate.getOtherHeirs() == null) {
+            mandate.setOtherHeirs(new ArrayList<>());
         }
 
         mandate.getOtherHeirs().remove(event.getHeir());

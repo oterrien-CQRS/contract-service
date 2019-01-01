@@ -2,6 +2,7 @@ version: "3.3"
 
 services:
 
+  # SERVICE DISCOVERY
   consul-agent-1: &consul-agent
     image: consul:latest
     networks:
@@ -30,8 +31,10 @@ services:
       - "8600:8600/udp"
     command: "agent -server -bootstrap-expect 3 -ui -client 0.0.0.0"
 
+  # LOAD BALANCER
   fabio:
     image: magiconair/fabio:latest
+    container_name: "fabio"
     ports:
       - "9998:9998" # GUI/management
       - "9999:9999" # HTTP exposed
@@ -41,6 +44,46 @@ services:
       - my-network
     depends_on:
       - "consul-server-bootstrap"
+
+  # EVENT STORE
+  mongodb:
+    image: mongo:latest
+    container_name: "mongodb"
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    ports:
+      - 27017:27017
+    networks:
+      - my-network
+  #    command: --auth
+
+  # ZOOKEEPER
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "32181:32181"
+    networks:
+      - my-network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.99.100:29092
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+    ports:
+      - "29092:29092"
+    networks:
+      - my-network
+    depends_on:
+      - zookeeper
 
 networks:
   my-network:

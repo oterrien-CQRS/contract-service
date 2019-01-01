@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: mandate-domain-service
+
+  cloud:
+    consul:
+      host: 192.168.99.100
+      port: 8500
+      config:
+        enabled: true
+      discovery:
+        enabled: true
+        preferIpAddress: true
+        tags: "urlprefix-/mandate/ strip=/mandate" # to define route
+        instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+        healthCheckPath: /actuator/health
+        healthCheckInterval: 5ms
+    stream:
+      bindings:
+        output:
+          destination: mandates
+          contentType: 'application/json'
+        input:
+          destination: mandates
+          contentType: 'application/json'
+          group: all
+          consumer:
+            durableSubscription: false
+            concurrency: 5
+            instanceIndex: 1
+      kafka:
+        binder:
+          brokers: 192.168.99.100
+          defaultBrokerPort: 29092
+          defaultZkPort: 32181

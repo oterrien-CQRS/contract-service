@@ -7,8 +7,10 @@ import com.ote.mandate.business.exception.MandateAlreadyCreatedException;
 import com.ote.mandate.business.exception.MandateNotYetCreatedException;
 import com.ote.mandate.business.model.command.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
+@Slf4j
 public class ValidMandateCommandService implements IMandateCommandService {
 
     private final IMandateCommandService mandateCommandService;
@@ -20,6 +22,8 @@ public class ValidMandateCommandService implements IMandateCommandService {
             mandateCommandService.apply(command);
         } catch (Validable.NotValidException e) {
             throw new MalformedCommandException(e);
+        } finally {
+            log.debug("Command {} is valid", command);
         }
     }
 
@@ -30,6 +34,8 @@ public class ValidMandateCommandService implements IMandateCommandService {
             mandateCommandService.apply(command);
         } catch (Validable.NotValidException e) {
             throw new MalformedCommandException(e);
+        } finally {
+            log.debug("Command {} is valid", command);
         }
     }
 
@@ -40,6 +46,8 @@ public class ValidMandateCommandService implements IMandateCommandService {
             mandateCommandService.apply(command);
         } catch (Validable.NotValidException e) {
             throw new MalformedCommandException(e);
+        } finally {
+            log.debug("Command {} is valid", command);
         }
     }
 
@@ -50,6 +58,8 @@ public class ValidMandateCommandService implements IMandateCommandService {
             mandateCommandService.apply(command);
         } catch (Validable.NotValidException e) {
             throw new MalformedCommandException(e);
+        } finally {
+            log.debug("Command {} is valid", command);
         }
     }
 
@@ -60,6 +70,8 @@ public class ValidMandateCommandService implements IMandateCommandService {
             mandateCommandService.apply(command);
         } catch (Validable.NotValidException e) {
             throw new MalformedCommandException(e);
+        } finally {
+            log.debug("Command {} is valid", command);
         }
     }
 }

@@ -1,14 +1,18 @@
 package com.ote.mandate.business.model.aggregate;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Data
 public class Notary {
 
     @NotBlank
-    private final String name;
+    private String name;
+
+    public Notary(String name) {
+        this.name = name;
+    }
 }

@@ -4,30 +4,35 @@ import com.ote.mandate.business.model.aggregate.Contractor;
 import com.ote.mandate.business.model.aggregate.Heir;
 import com.ote.mandate.business.model.aggregate.Notary;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor
 @Getter
+@Setter
 @ToString(callSuper = true)
 public class MandateCreatedEvent extends BaseMandateEvent {
 
     @NotBlank
-    private final String bankName;
+    private String bankName;
 
     @NotNull
-    private final Contractor contractor;
+    private Contractor contractor;
 
-    @Setter
+    @Valid
     private Notary notary;
 
-    @Setter
+    @Valid
     private Heir mainHeir;
 
+    @Valid
     private final List<Heir> otherHeirs = new ArrayList<>();
 
     public MandateCreatedEvent(String id, String bankName, Contractor contractor) {

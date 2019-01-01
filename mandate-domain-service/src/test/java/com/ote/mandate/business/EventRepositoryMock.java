@@ -1,4 +1,4 @@
-package com.ote.mandate;
+package com.ote.mandate.business;
 
 import com.ote.framework.IEvent;
 import com.ote.mandate.business.spi.IEventRepository;
