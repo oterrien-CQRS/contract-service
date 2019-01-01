@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/mandates")
+@RequestMapping("/v1/mandates")
 @Validated
 @Slf4j
 public class MandateCommandController {
