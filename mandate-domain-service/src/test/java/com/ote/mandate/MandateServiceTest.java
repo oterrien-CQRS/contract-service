@@ -2,6 +2,7 @@ package com.ote.mandate;
 
 import com.ote.mandate.business.api.IMandateCommandService;
 import com.ote.mandate.business.api.MandateServiceProvider;
+import com.ote.mandate.business.exception.MalformedCommandException;
 import com.ote.mandate.business.model.aggregate.*;
 import com.ote.mandate.business.model.command.CreateMandateCommand;
 import com.ote.mandate.business.model.command.DefineMainHeirCommand;
@@ -72,5 +73,17 @@ public class MandateServiceTest {
 
         Mandate mandate = new MandateProjector().project(eventRepository.findAll("411455"));
         Assertions.assertThat(mandate.getNotary().getName()).isEqualTo("Maitre Galibert");
+    }
+
+    @Test(expected = MalformedCommandException.class)
+    public void invalidCommand() throws Exception {
+
+        try {
+            CreateMandateCommand command1 = new CreateMandateCommand(null, "Socgen", new Contractor(null), null, null, Arrays.asList(new Heir(null), new Heir("Emma")));
+            mandateService.apply(command1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

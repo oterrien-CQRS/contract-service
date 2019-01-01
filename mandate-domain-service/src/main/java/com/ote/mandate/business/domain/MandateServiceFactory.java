@@ -6,6 +6,6 @@ import com.ote.mandate.business.spi.IEventRepository;
 public class MandateServiceFactory {
 
     public IMandateCommandService createService(IEventRepository eventRepository) {
-        return new MandateCommandService(eventRepository);
+        return new ValidMandateCommandService(new MandateCommandService(eventRepository));
     }
 }

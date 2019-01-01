@@ -80,4 +80,9 @@ public final class MandateProjector implements IProjector<Mandate> {
 
         mandate.setNotary(event.getNotary());
     }
+
+    @Override
+    public void close() {
+        eventHandlers.close();
+    }
 }
