@@ -8,6 +8,7 @@ import com.ote.mandate.business.exception.MandateNotYetCreatedException;
 import com.ote.mandate.business.model.command.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -16,10 +17,10 @@ public class ValidMandateCommandService implements IMandateCommandService {
     private final IMandateCommandService mandateCommandService;
 
     @Override
-    public void apply(CreateMandateCommand command) throws MalformedCommandException, MandateAlreadyCreatedException {
+    public Mono<Boolean> createMandate(Mono<CreateMandateCommand> command) throws MalformedCommandException, MandateAlreadyCreatedException {
         try {
             command.validate();
-            mandateCommandService.apply(command);
+            return mandateCommandService.createMandate(command);
         } catch (Validable.NotValidException e) {
             throw new MalformedCommandException(e);
         } finally {
@@ -28,10 +29,10 @@ public class ValidMandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public void apply(AddHeirCommand command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> addHeir(Mono<AddHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
         try {
             command.validate();
-            mandateCommandService.apply(command);
+            return mandateCommandService.addHeir(command);
         } catch (Validable.NotValidException e) {
             throw new MalformedCommandException(e);
         } finally {
@@ -40,10 +41,10 @@ public class ValidMandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public void apply(RemoveHeirCommand command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> removeHeir(Mono<RemoveHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
         try {
             command.validate();
-            mandateCommandService.apply(command);
+            return mandateCommandService.removeHeir(command);
         } catch (Validable.NotValidException e) {
             throw new MalformedCommandException(e);
         } finally {
@@ -52,10 +53,10 @@ public class ValidMandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public void apply(DefineMainHeirCommand command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> defineMainHeir(Mono<DefineMainHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
         try {
             command.validate();
-            mandateCommandService.apply(command);
+            return mandateCommandService.defineMainHeir(command);
         } catch (Validable.NotValidException e) {
             throw new MalformedCommandException(e);
         } finally {
@@ -64,10 +65,10 @@ public class ValidMandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public void apply(DefineNotaryCommand command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> defineNotary(Mono<DefineNotaryCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
         try {
             command.validate();
-            mandateCommandService.apply(command);
+            return mandateCommandService.defineNotary(command);
         } catch (Validable.NotValidException e) {
             throw new MalformedCommandException(e);
         } finally {

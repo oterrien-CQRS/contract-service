@@ -1,7 +1,6 @@
 package com.ote.mandate.business;
 
 import com.ote.mandate.business.api.IMandateCommandService;
-import com.ote.mandate.business.api.MandateServiceProvider;
 import com.ote.mandate.business.exception.MalformedCommandException;
 import com.ote.mandate.business.model.aggregate.*;
 import com.ote.mandate.business.model.command.CreateMandateCommand;
@@ -15,6 +14,8 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import java.util.Arrays;
 
@@ -30,7 +31,8 @@ public class MandateServiceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mandateService = MandateServiceProvider.getInstance().getFactory().createService(eventRepository);
+
+        StepVerifier.create(Flux.just(10, 12)).expectSubscription().thenexpectNext()
     }
 
     @After
@@ -42,7 +44,7 @@ public class MandateServiceTest {
     public void createCommandShouldRaiseEventAndCreateMandate() throws Exception {
 
         CreateMandateCommand command = new CreateMandateCommand("411455", "Socgen", new Contractor("Olivier"), new Notary("Maitre"), new Heir("Maryline"), Arrays.asList(new Heir("Baptiste"), new Heir("Emma")));
-        mandateService.apply(command);
+        mandateService.createMandate(command);
 
         Mandate mandate = new MandateProjector().project(eventRepository.findAll("411455"));
 
@@ -53,10 +55,10 @@ public class MandateServiceTest {
     public void defineMainHeirCommandShouldRaiseEvent() throws Exception {
 
         CreateMandateCommand command1 = new CreateMandateCommand("411455", "Socgen", new Contractor("Olivier"), new Notary("Maitre"), null, Arrays.asList(new Heir("Baptiste"), new Heir("Emma")));
-        mandateService.apply(command1);
+        mandateService.createMandate(command1);
 
         DefineMainHeirCommand command2 = new DefineMainHeirCommand("411455", new Heir("Maryline"));
-        mandateService.apply(command2);
+        mandateService.defineMainHeir(command2);
 
         Mandate mandate = new MandateProjector().project(eventRepository.findAll("411455"));
         Assertions.assertThat(mandate.getMainHeir().getName()).isEqualTo("Maryline");
@@ -66,10 +68,10 @@ public class MandateServiceTest {
     public void defineNotaryCommandShouldRaiseEvent() throws Exception {
 
         CreateMandateCommand command1 = new CreateMandateCommand("411455", "Socgen", new Contractor("Olivier"), null, null, Arrays.asList(new Heir("Baptiste"), new Heir("Emma")));
-        mandateService.apply(command1);
+        mandateService.createMandate(command1);
 
         DefineNotaryCommand command2 = new DefineNotaryCommand("411455", new Notary("Maitre Galibert"));
-        mandateService.apply(command2);
+        mandateService.defineNotary(command2);
 
         Mandate mandate = new MandateProjector().project(eventRepository.findAll("411455"));
         Assertions.assertThat(mandate.getNotary().getName()).isEqualTo("Maitre Galibert");
@@ -80,7 +82,7 @@ public class MandateServiceTest {
 
         try {
             CreateMandateCommand command1 = new CreateMandateCommand(null, "Socgen", new Contractor(null), null, null, Arrays.asList(new Heir(null), new Heir("Emma")));
-            mandateService.apply(command1);
+            mandateService.createMandate(command1);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

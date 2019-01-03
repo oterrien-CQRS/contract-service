@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -34,7 +35,7 @@ public class MandateCommandController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@NotNull @Valid @RequestBody MandatePayload mandate) throws Exception {
+    public Mono<Boolean> create(@NotNull @Valid @RequestBody MandatePayload mandate) throws Exception {
 
         CreateMandateCommand command = new CreateMandateCommand(mandate.getId(), mandate.getBankName(),
                 mandateMapperService.convert(mandate.getContractor()),
@@ -42,42 +43,42 @@ public class MandateCommandController {
                 mandateMapperService.convert(mandate.getMainHeir()),
                 mandateMapperService.convert(mandate.getOtherHeirs().toArray(new HeirPayload[0])));
 
-        mandateCommandService.apply(command);
+        return mandateCommandService.createMandate(command);
     }
 
     @PutMapping(value = "/{id}/heirs", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public void addHeirs(@PathVariable String id,
-                         @NotNull @Valid @RequestBody List<HeirPayload> heirs) throws Exception {
+    public Mono<Boolean> addHeirs(@PathVariable String id,
+                                  @NotNull @Valid @RequestBody List<HeirPayload> heirs) throws Exception {
 
         AddHeirCommand command = new AddHeirCommand(id, mandateMapperService.convert(heirs.toArray(new HeirPayload[0])));
-        mandateCommandService.apply(command);
+        return mandateCommandService.addHeir(command);
     }
 
     @DeleteMapping(value = "/{id}/heirs", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public void removeHeirs(@PathVariable String id,
-                            @NotNull @Valid @RequestBody List<HeirPayload> heirs) throws Exception {
+    public Mono<Boolean> removeHeirs(@PathVariable String id,
+                                     @NotNull @Valid @RequestBody List<HeirPayload> heirs) throws Exception {
 
         RemoveHeirCommand command = new RemoveHeirCommand(id, mandateMapperService.convert(heirs.toArray(new HeirPayload[0])));
-        mandateCommandService.apply(command);
+        return mandateCommandService.removeHeir(command);
     }
 
     @PutMapping(value = "/{id}/mainHeir", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public void defineMainHeir(@PathVariable String id,
-                               @NotNull @Valid @RequestBody HeirPayload mainHeir) throws Exception {
+    public Mono<Boolean> defineMainHeir(@PathVariable String id,
+                                        @NotNull @Valid @RequestBody HeirPayload mainHeir) throws Exception {
 
         DefineMainHeirCommand command = new DefineMainHeirCommand(id, mandateMapperService.convert(mainHeir));
-        mandateCommandService.apply(command);
+        return mandateCommandService.defineMainHeir(command);
     }
 
     @PutMapping(value = "/{id}/notary", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public void defineNotary(@PathVariable String id,
-                             @NotNull @Valid @RequestBody NotaryPayload notary) throws Exception {
+    public Mono<Boolean> defineNotary(@PathVariable String id,
+                                      @NotNull @Valid @RequestBody NotaryPayload notary) throws Exception {
 
         DefineNotaryCommand command = new DefineNotaryCommand(id, mandateMapperService.convert(notary));
-        mandateCommandService.apply(command);
+        return mandateCommandService.defineNotary(command);
     }
 }

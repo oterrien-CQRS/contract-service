@@ -1,13 +1,13 @@
 package com.ote.mandate.business.spi;
 
 import com.ote.framework.IEvent;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface IEventRepository {
 
-    void storeAndPublish(IEvent event);
+    Mono<Boolean> storeAndPublish(Mono<IEvent> event);
 
-    List<IEvent> findAll(String id);
+    Flux<IEvent> findAll(String id);
 }
 

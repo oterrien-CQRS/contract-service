@@ -11,6 +11,7 @@ import com.ote.mandate.business.model.event.*;
 import com.ote.mandate.business.spi.IEventRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,9 +27,9 @@ class MandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public void apply(CreateMandateCommand command) throws MandateAlreadyCreatedException {
+    public Mono<Boolean> createMandate(Mono<CreateMandateCommand> command) throws MandateAlreadyCreatedException {
 
-        log.debug("Trying to apply command : " + command);
+        log.debug("Trying to addHeir command : " + command);
 
         String id = command.getId();
 
@@ -47,9 +48,9 @@ class MandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public void apply(AddHeirCommand command) throws MandateNotYetCreatedException {
+    public Mono<Boolean> addHeir(Mono<AddHeirCommand> command) throws MandateNotYetCreatedException {
         try {
-            log.debug("Trying to apply command : " + command);
+            log.debug("Trying to addHeir command : " + command);
 
             String id = command.getId();
 
@@ -83,9 +84,9 @@ class MandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public void apply(RemoveHeirCommand command) throws MandateNotYetCreatedException {
+    public Mono<Boolean> removeHeir(Mono<RemoveHeirCommand> command) throws MandateNotYetCreatedException {
         try {
-            log.debug("Trying to apply command : " + command);
+            log.debug("Trying to addHeir command : " + command);
 
             String id = command.getId();
 
@@ -119,9 +120,9 @@ class MandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public void apply(DefineMainHeirCommand command) throws MandateNotYetCreatedException {
+    public Mono<Boolean> defineMainHeir(Mono<DefineMainHeirCommand> command) throws MandateNotYetCreatedException {
         try {
-            log.debug("Trying to apply command : " + command);
+            log.debug("Trying to addHeir command : " + command);
 
             String id = command.getId();
 
@@ -149,9 +150,9 @@ class MandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public void apply(DefineNotaryCommand command) throws MandateNotYetCreatedException {
+    public Mono<Boolean> defineNotary(Mono<DefineNotaryCommand> command) throws MandateNotYetCreatedException {
         try {
-            log.debug("Trying to apply command : " + command);
+            log.debug("Trying to addHeir command : " + command);
 
             String id = command.getId();
 
