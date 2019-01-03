@@ -12,6 +12,7 @@
     <description>Contract CQRS</description>
 
     <modules>
+        <module>mandate-domain</module>
         <module>mandate-domain-service</module>
         <module>contract-domain-service</module>
     </modules>
@@ -44,6 +45,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>4.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.4</version>
         </dependency>
         <!-- TEST -->
         <dependency>
