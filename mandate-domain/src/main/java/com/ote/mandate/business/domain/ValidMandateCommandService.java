@@ -1,5 +1,6 @@
 package com.ote.mandate.business.domain;
 
+import com.ote.framework.LambdaException;
 import com.ote.framework.Validable;
 import com.ote.mandate.business.api.IMandateCommandService;
 import com.ote.mandate.business.exception.MalformedCommandException;
@@ -8,6 +9,8 @@ import com.ote.mandate.business.exception.MandateNotYetCreatedException;
 import com.ote.mandate.business.model.command.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.Exceptions;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
@@ -17,7 +20,11 @@ public class ValidMandateCommandService implements IMandateCommandService {
     private final IMandateCommandService mandateCommandService;
 
     @Override
-    public Mono<Boolean> createMandate(Mono<CreateMandateCommand> command) throws MalformedCommandException, MandateAlreadyCreatedException {
+    public Mono<Boolean> createMandate(CreateMandateCommand command) throws MalformedCommandException, MandateAlreadyCreatedException {
+        reactor.core.Exceptions.propagate()
+
+
+
         try {
             command.validate();
             return mandateCommandService.createMandate(command);
@@ -29,7 +36,7 @@ public class ValidMandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> addHeir(Mono<AddHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> addHeir(AddHeirCommand command) throws MalformedCommandException, MandateNotYetCreatedException {
         try {
             command.validate();
             return mandateCommandService.addHeir(command);
@@ -41,7 +48,7 @@ public class ValidMandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> removeHeir(Mono<RemoveHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> removeHeir(RemoveHeirCommand command) throws MalformedCommandException, MandateNotYetCreatedException {
         try {
             command.validate();
             return mandateCommandService.removeHeir(command);
@@ -53,7 +60,7 @@ public class ValidMandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> defineMainHeir(Mono<DefineMainHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> defineMainHeir(DefineMainHeirCommand command) throws MalformedCommandException, MandateNotYetCreatedException {
         try {
             command.validate();
             return mandateCommandService.defineMainHeir(command);
@@ -65,7 +72,7 @@ public class ValidMandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> defineNotary(Mono<DefineNotaryCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> defineNotary(DefineNotaryCommand command) throws MalformedCommandException, MandateNotYetCreatedException {
         try {
             command.validate();
             return mandateCommandService.defineNotary(command);

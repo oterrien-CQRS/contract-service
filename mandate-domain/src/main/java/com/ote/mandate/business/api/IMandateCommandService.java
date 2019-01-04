@@ -8,13 +8,13 @@ import reactor.core.publisher.Mono;
 
 public interface IMandateCommandService {
 
-    Mono<Boolean> createMandate(Mono<CreateMandateCommand> command) throws MalformedCommandException, MandateAlreadyCreatedException;
+    Mono<Boolean> createMandate(CreateMandateCommand command) throws MalformedCommandException, MandateAlreadyCreatedException;
 
-    Mono<Boolean> addHeir(Mono<AddHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException;
+    Mono<Boolean> addHeir(AddHeirCommand command) throws MalformedCommandException, MandateNotYetCreatedException;
 
-    Mono<Boolean> removeHeir(Mono<RemoveHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException;
+    Mono<Boolean> removeHeir(RemoveHeirCommand command) throws MalformedCommandException, MandateNotYetCreatedException;
 
-    Mono<Boolean> defineMainHeir(Mono<DefineMainHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException;
+    Mono<Boolean> defineMainHeir(DefineMainHeirCommand command) throws MalformedCommandException, MandateNotYetCreatedException;
 
-    Mono<Boolean> defineNotary(Mono<DefineNotaryCommand> command) throws MalformedCommandException, MandateNotYetCreatedException;
+    Mono<Boolean> defineNotary(DefineNotaryCommand command) throws MalformedCommandException, MandateNotYetCreatedException;
 }

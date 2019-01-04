@@ -27,7 +27,7 @@ class MandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> createMandate(Mono<CreateMandateCommand> command) throws MandateAlreadyCreatedException {
+    public Mono<Boolean> createMandate(CreateMandateCommand command) throws MandateAlreadyCreatedException {
 
         log.debug("Trying to addHeir command : " + command);
 
@@ -48,7 +48,7 @@ class MandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> addHeir(Mono<AddHeirCommand> command) throws MandateNotYetCreatedException {
+    public Mono<Boolean> addHeir(AddHeirCommand command) throws MandateNotYetCreatedException {
         try {
             log.debug("Trying to addHeir command : " + command);
 
@@ -84,7 +84,7 @@ class MandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> removeHeir(Mono<RemoveHeirCommand> command) throws MandateNotYetCreatedException {
+    public Mono<Boolean> removeHeir(RemoveHeirCommand command) throws MandateNotYetCreatedException {
         try {
             log.debug("Trying to addHeir command : " + command);
 
@@ -120,7 +120,7 @@ class MandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> defineMainHeir(Mono<DefineMainHeirCommand> command) throws MandateNotYetCreatedException {
+    public Mono<Boolean> defineMainHeir(DefineMainHeirCommand command) throws MandateNotYetCreatedException {
         try {
             log.debug("Trying to addHeir command : " + command);
 
@@ -150,7 +150,7 @@ class MandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> defineNotary(Mono<DefineNotaryCommand> command) throws MandateNotYetCreatedException {
+    public Mono<Boolean> defineNotary(DefineNotaryCommand command) throws MandateNotYetCreatedException {
         try {
             log.debug("Trying to addHeir command : " + command);
 
