@@ -8,6 +8,6 @@ public interface IEventRepository {
 
     Mono<Boolean> storeAndPublish(Mono<IEvent> event);
 
-    Flux<IEvent> findAll(String id);
+    Flux<IEvent> findAll(Mono<String> id);
 }
 

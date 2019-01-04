@@ -1,21 +1,15 @@
 package com.ote.mandate.business.domain;
 
+import com.ote.framework.ICommand;
 import com.ote.framework.IEvent;
 import com.ote.mandate.business.api.IMandateCommandService;
 import com.ote.mandate.business.exception.MandateAlreadyCreatedException;
 import com.ote.mandate.business.exception.MandateNotYetCreatedException;
-import com.ote.mandate.business.model.aggregate.Mandate;
-import com.ote.mandate.business.model.aggregate.MandateProjector;
 import com.ote.mandate.business.model.command.*;
-import com.ote.mandate.business.model.event.*;
+import com.ote.mandate.business.model.event.MandateCreatedEvent;
 import com.ote.mandate.business.spi.IEventRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 class MandateCommandService implements IMandateCommandService {
@@ -27,30 +21,42 @@ class MandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> createMandate(CreateMandateCommand command) throws MandateAlreadyCreatedException {
+    public Mono<Boolean> createMandate(Mono<CreateMandateCommand> command) throws MandateAlreadyCreatedException {
 
-        log.debug("Trying to addHeir command : " + command);
+        return command.
+                doOnNext(cmd -> log.debug("Trying to create mandate : {} ", cmd)).
+                flatMap(this::raiseErrorIfEventsExists).
+                map(this::createEvent).
+                flatMap(eventRepository::storeAndPublish);
+    }
 
-        String id = command.getId();
+    private <T extends ICommand> Mono<T> raiseErrorIfEventsExists(T command) {
+        return eventRepository.findAll(Mono.just(command.getId())).hasElements().
+                flatMap(hasElements -> {
+                    if (hasElements) {
+                        return Mono.error(new MandateAlreadyCreatedException(command.getId()));
+                    } else {
+                        return Mono.just(command);
+                    }
+                });
+    }
 
-        if (CollectionUtils.isNotEmpty(eventRepository.findAll(id))) {
-            throw new MandateAlreadyCreatedException(id);
-        }
+    private Mono<IEvent> createEvent(CreateMandateCommand command) {
 
-        MandateCreatedEvent event = new MandateCreatedEvent(id, command.getBankName(), command.getContractor());
+        MandateCreatedEvent event = new MandateCreatedEvent(command.getId(), command.getBankName(), command.getContractor());
         if (!command.getOtherHeirs().isEmpty()) {
             event.getOtherHeirs().addAll(command.getOtherHeirs());
         }
         event.setMainHeir(command.getMainHeir());
         event.setNotary(command.getNotary());
-
-        eventRepository.storeAndPublish(event);
+        return Mono.just(event);
     }
 
+
     @Override
-    public Mono<Boolean> addHeir(AddHeirCommand command) throws MandateNotYetCreatedException {
-        try {
-            log.debug("Trying to addHeir command : " + command);
+    public Mono<Boolean> addHeir(Mono<AddHeirCommand> command) throws MandateNotYetCreatedException {
+       /* try {
+            log.debug("Trying to add heirs : {}", command);
 
             String id = command.getId();
 
@@ -80,13 +86,14 @@ class MandateCommandService implements IMandateCommandService {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
+        }*/
+        return Mono.just(true);
     }
 
     @Override
-    public Mono<Boolean> removeHeir(RemoveHeirCommand command) throws MandateNotYetCreatedException {
-        try {
-            log.debug("Trying to addHeir command : " + command);
+    public Mono<Boolean> removeHeir(Mono<RemoveHeirCommand> command) throws MandateNotYetCreatedException {
+       /* try {
+            log.debug("Trying to remove heirs : {}", command);
 
             String id = command.getId();
 
@@ -116,13 +123,14 @@ class MandateCommandService implements IMandateCommandService {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
+        }*/
+        return Mono.just(true);
     }
 
     @Override
-    public Mono<Boolean> defineMainHeir(DefineMainHeirCommand command) throws MandateNotYetCreatedException {
-        try {
-            log.debug("Trying to addHeir command : " + command);
+    public Mono<Boolean> defineMainHeir(Mono<DefineMainHeirCommand> command) throws MandateNotYetCreatedException {
+        /*try {
+            log.debug("Trying to define main heir : {}", command);
 
             String id = command.getId();
 
@@ -146,13 +154,14 @@ class MandateCommandService implements IMandateCommandService {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
+        }*/
+        return Mono.just(true);
     }
 
     @Override
-    public Mono<Boolean> defineNotary(DefineNotaryCommand command) throws MandateNotYetCreatedException {
-        try {
-            log.debug("Trying to addHeir command : " + command);
+    public Mono<Boolean> defineNotary(Mono<DefineNotaryCommand> command) throws MandateNotYetCreatedException {
+        /*try {
+            log.debug("Trying to define notary : {}", command);
 
             String id = command.getId();
 
@@ -176,6 +185,7 @@ class MandateCommandService implements IMandateCommandService {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
+        }*/
+        return Mono.just(true);
     }
 }

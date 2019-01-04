@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public final class EventDocument<T extends InnerEventDocument> {
+public final class EventDocument {
 
     @Id
     private String id;
@@ -21,5 +21,5 @@ public final class EventDocument<T extends InnerEventDocument> {
     @CreatedDate
     private LocalDateTime createdTime;
 
-    private T event = null;
+    private InnerEventDocument event = null;
 }

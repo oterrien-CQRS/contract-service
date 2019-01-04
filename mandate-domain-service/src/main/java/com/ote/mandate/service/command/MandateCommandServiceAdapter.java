@@ -1,4 +1,4 @@
-package com.ote.mandate.service.adapter;
+package com.ote.mandate.service.command;
 
 import com.ote.mandate.business.api.IMandateCommandService;
 import com.ote.mandate.business.api.MandateServiceProvider;
@@ -22,27 +22,27 @@ public class MandateCommandServiceAdapter implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> createMandate(CreateMandateCommand command) throws MalformedCommandException, MandateAlreadyCreatedException {
+    public Mono<Boolean> createMandate(Mono<CreateMandateCommand> command) throws MalformedCommandException, MandateAlreadyCreatedException {
         return this.mandateCommandService.createMandate(command);
     }
 
     @Override
-    public Mono<Boolean> addHeir(AddHeirCommand command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> addHeir(Mono<AddHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
         return this.mandateCommandService.addHeir(command);
     }
 
     @Override
-    public Mono<Boolean> removeHeir(RemoveHeirCommand command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> removeHeir(Mono<RemoveHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
         return this.mandateCommandService.removeHeir(command);
     }
 
     @Override
-    public Mono<Boolean> defineMainHeir(DefineMainHeirCommand command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> defineMainHeir(Mono<DefineMainHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
         return this.mandateCommandService.defineMainHeir(command);
     }
 
     @Override
-    public Mono<Boolean> defineNotary(DefineNotaryCommand command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> defineNotary(Mono<DefineNotaryCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
         return this.mandateCommandService.defineNotary(command);
     }
 }

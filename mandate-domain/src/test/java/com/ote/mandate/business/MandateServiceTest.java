@@ -1,23 +1,12 @@
 package com.ote.mandate.business;
 
 import com.ote.mandate.business.api.IMandateCommandService;
-import com.ote.mandate.business.exception.MalformedCommandException;
-import com.ote.mandate.business.model.aggregate.*;
-import com.ote.mandate.business.model.command.CreateMandateCommand;
-import com.ote.mandate.business.model.command.DefineMainHeirCommand;
-import com.ote.mandate.business.model.command.DefineNotaryCommand;
-import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
-
-import java.util.Arrays;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MandateServiceTest {
@@ -31,15 +20,13 @@ public class MandateServiceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        StepVerifier.create(Flux.just(10, 12)).expectSubscription().thenexpectNext()
     }
 
     @After
     public void tearDown() {
         eventRepository.clean();
     }
-
+/*
     @Test
     public void createCommandShouldRaiseEventAndCreateMandate() throws Exception {
 
@@ -87,5 +74,5 @@ public class MandateServiceTest {
             e.printStackTrace();
             throw e;
         }
-    }
+    }*/
 }

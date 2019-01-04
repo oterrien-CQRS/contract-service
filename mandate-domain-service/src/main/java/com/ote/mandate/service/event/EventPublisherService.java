@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.integration.support.MessageBuilder;
-import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 @Service
 @EnableBinding(Source.class)
@@ -20,8 +20,10 @@ public class EventPublisherService {
         this.source = source;
     }
 
-    public void publish(IEvent event) {
-        Message<IEvent> message = MessageBuilder.withPayload(event).build();
-        source.output().send(message);
+    public Mono<Boolean> publish(Mono<IEvent> event) {
+        return event.
+                doOnNext(evt -> log.debug("Trying to publish event message {}", evt)).
+                map(evt -> MessageBuilder.withPayload(evt).setHeader("EventType", evt.getClass().getName()).build()).
+                map(msg -> source.output().send(msg));
     }
 }

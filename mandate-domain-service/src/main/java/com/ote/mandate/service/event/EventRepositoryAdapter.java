@@ -6,10 +6,10 @@ import com.ote.mandate.service.event.model.EventDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,29 +29,28 @@ public class EventRepositoryAdapter implements IEventRepository {
     }
 
     @Override
-    public void storeAndPublish(IEvent event) {
-        log.debug("Storing and publishing event " + event.getClass().getTypeName());
+    public Mono<Boolean> storeAndPublish(Mono<IEvent> monoEvent) {
 
-        try {
-            EventDocument document = new EventDocument();
-            document.setCreatedTime(LocalDateTime.now());
-            document.setEvent(this.mandateEventMapperService.getEventToDocument().convert(event));
-            eventRepository.save(document);
-            // TODO publish
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            eventPublisherService.publish(event);
-        }
+        return monoEvent.
+                doOnNext(evt -> log.debug("Storing and publishing event " + evt.getClass().getTypeName())).
+                flatMap(evt -> {
+                    EventDocument document = new EventDocument();
+                    document.setCreatedTime(LocalDateTime.now());
+                    document.setEvent(this.mandateEventMapperService.getEventToDocument().convert(evt));
+                    return eventRepository.save(document).
+                            doOnSuccess(t -> log.debug("Event {} has been stored", evt.getClass().getSimpleName())).
+                            map(t -> evt);
+                }).
+                flatMap(evt -> eventPublisherService.publish(Mono.just(evt)).
+                        doOnSuccess(t -> log.debug("Event {} has been pushed", evt.getClass().getSimpleName()))
+                );
     }
 
 
     @Override
-    public List<IEvent> findAll(String id) {
-        return eventRepository.findAllByEventId(id).
-                stream().
-                map(document -> document.getEvent()).
-                map(event -> this.mandateEventMapperService.getDocumentToEvent().convert(event)).
-                collect(Collectors.toList());
+    public Flux<IEvent> findAll(Mono<String> id) {
+
+        return eventRepository.findAllByEventId(id).map(EventDocument::getEvent).
+                map(event -> this.mandateEventMapperService.getDocumentToEvent().convert(event));
     }
 }
