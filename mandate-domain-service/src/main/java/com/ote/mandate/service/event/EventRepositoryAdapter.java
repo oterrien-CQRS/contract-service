@@ -31,17 +31,17 @@ public class EventRepositoryAdapter implements IEventRepository {
     @Override
     public void storeAndPublish(IEvent event) {
         log.debug("Storing and publishing event " + event.getClass().getTypeName());
-
         try {
             EventDocument document = new EventDocument();
             document.setCreatedTime(LocalDateTime.now());
             document.setEvent(this.mandateEventMapperService.getEventToDocument().convert(event));
             eventRepository.save(document);
-            // TODO publish
+            log.debug("Event {} has been stored", event.getClass().getSimpleName());
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             eventPublisherService.publish(event);
+            log.debug("Event {} has been published", event.getClass().getSimpleName());
         }
     }
 

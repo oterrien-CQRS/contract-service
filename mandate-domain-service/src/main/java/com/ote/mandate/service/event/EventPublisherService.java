@@ -21,7 +21,10 @@ public class EventPublisherService {
     }
 
     public void publish(IEvent event) {
-        Message<IEvent> message = MessageBuilder.withPayload(event).build();
+        Message<IEvent> message = MessageBuilder.
+                withPayload(event).
+                setHeader("EventType", event.getClass().getName()).
+                build();
         source.output().send(message);
     }
 }

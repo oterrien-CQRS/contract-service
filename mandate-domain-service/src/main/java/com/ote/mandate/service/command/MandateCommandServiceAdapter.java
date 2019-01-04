@@ -1,4 +1,4 @@
-package com.ote.mandate.service.adapter;
+package com.ote.mandate.service.command;
 
 import com.ote.mandate.business.api.IMandateCommandService;
 import com.ote.mandate.business.api.MandateServiceProvider;
