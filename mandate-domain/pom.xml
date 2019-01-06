@@ -39,12 +39,6 @@
             <version>3.2.3.RELEASE</version>
             <scope>compile</scope>
         </dependency>
-        <!-- VAVR -->
-        <dependency>
-            <groupId>io.vavr</groupId>
-            <artifactId>vavr</artifactId>
-            <version>0.9.2</version>
-        </dependency>
         <!-- TEST -->
         <dependency>
             <groupId>io.projectreactor</groupId>

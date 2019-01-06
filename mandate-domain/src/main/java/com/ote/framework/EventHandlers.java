@@ -7,9 +7,9 @@ import java.util.stream.Stream;
 
 public final class EventHandlers implements AutoCloseable {
 
-    private final Map<String, IEventHandler<? extends IEvent>> eventHandlers = new HashMap<>();
+    private final Map<String, CheckedConsumer<? extends IEvent>> eventHandlers = new HashMap<>();
 
-    public <T extends IEvent> void bind(Class<T> eventClass, IEventHandler<T> eventHandler) {
+    public <T extends IEvent> void bind(Class<T> eventClass, CheckedConsumer<T> eventHandler) {
         eventHandlers.put(eventClass.getTypeName(), eventHandler);
     }
 
@@ -29,9 +29,9 @@ public final class EventHandlers implements AutoCloseable {
 
     @SuppressWarnings("unchecked")
     public <T extends IEvent> void handle(T event) throws Exception {
-        IEventHandler eventHandler = Optional.ofNullable(eventHandlers.get(event.getClass().getTypeName())).
+        CheckedConsumer eventHandler = Optional.ofNullable(eventHandlers.get(event.getClass().getTypeName())).
                 orElseThrow(() -> new MissingEventBindingException(event.getClass()));
-        eventHandler.handle(event);
+        eventHandler.apply(event);
     }
 
     @Override
@@ -46,11 +46,5 @@ public final class EventHandlers implements AutoCloseable {
         MissingEventBindingException(Class eventClass) {
             super(String.format(MESSAGE_TEMPLATE, eventClass.getTypeName()));
         }
-    }
-
-    @FunctionalInterface
-    public interface IEventHandler<TE> {
-
-        void handle(TE event) throws Exception;
     }
 }

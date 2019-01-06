@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class EventRepositoryMock implements IEventRepository {
+public final class EventRepositoryMock implements IEventRepository {
 
     private Map<Object, List<IEvent>> eventStore = new HashMap<>();
 

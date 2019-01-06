@@ -10,9 +10,9 @@ public interface IMandateCommandService {
 
     Mono<Boolean> createMandate(Mono<CreateMandateCommand> command) throws MalformedCommandException, MandateAlreadyCreatedException;
 
-    Mono<Boolean> addHeir(Mono<AddHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException;
+    Mono<Boolean> addHeirs(Mono<AddHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException;
 
-    Mono<Boolean> removeHeir(Mono<RemoveHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException;
+    Mono<Boolean> removeHeirs(Mono<RemoveHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException;
 
     Mono<Boolean> defineMainHeir(Mono<DefineMainHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException;
 

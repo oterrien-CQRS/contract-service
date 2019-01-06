@@ -1,8 +1,9 @@
 package com.ote.framework;
 
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface IProjector<T> extends AutoCloseable {
 
-    T project(List<IEvent> events) throws Exception;
+    Mono<T> project(Flux<IEvent> events);
 }

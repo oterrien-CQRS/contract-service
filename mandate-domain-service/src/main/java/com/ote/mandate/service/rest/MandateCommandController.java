@@ -1,6 +1,7 @@
 package com.ote.mandate.service.rest;
 
 import com.ote.mandate.business.api.IMandateCommandService;
+import com.ote.mandate.business.model.command.AddHeirCommand;
 import com.ote.mandate.business.model.command.CreateMandateCommand;
 import com.ote.mandate.service.rest.payload.HeirPayload;
 import com.ote.mandate.service.rest.payload.MandatePayload;
@@ -12,11 +13,13 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.Exceptions;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/v1/mandates")
@@ -43,7 +46,7 @@ public class MandateCommandController {
                         mandateMapperService.convert(m.getContractor()),
                         mandateMapperService.convert(m.getNotary()),
                         mandateMapperService.convert(m.getMainHeir()),
-                        mandateMapperService.convert(m.getOtherHeirs().toArray(new HeirPayload[0])))).
+                        mandateMapperService.convert(m.getOtherHeirs()))).
                 flatMap(cmd -> {
                     try {
                         return mandateCommandService.createMandate(Mono.just(cmd));
@@ -51,24 +54,23 @@ public class MandateCommandController {
                         throw Exceptions.propagate(e);
                     }
                 });
-/*
-        CreateMandateCommand command = new CreateMandateCommand(mandate.getId(), mandate.getBankName(),
-                mandateMapperService.convert(mandate.getContractor()),
-                mandateMapperService.convert(mandate.getNotary()),
-                mandateMapperService.convert(mandate.getMainHeir()),
-                mandateMapperService.convert(mandate.getOtherHeirs().toArray(new HeirPayload[0])));
-
-        mandateCommandService.createMandate(command);*/
     }
 
     @PutMapping(value = "/{id}/heirs", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public Mono<Boolean> addHeirs(@PathVariable String id,
-                                  @NotNull @Valid @RequestBody List<HeirPayload> heirs) throws Exception {
+                                  @NotNull @Valid @RequestBody Flux<HeirPayload> heirs) throws Exception {
 
-       /* AddHeirCommand command = new AddHeirCommand(id, mandateMapperService.convert(heirs.toArray(new HeirPayload[0])));
-        return mandateCommandService.addHeir(command);*/
-        return Mono.just(true);
+        return heirs.
+                collect(Collectors.toList()).
+                map(list -> new AddHeirCommand(id, mandateMapperService.convert(list))).
+                flatMap(cmd -> {
+                    try {
+                        return mandateCommandService.addHeirs(Mono.just(cmd));
+                    } catch (Exception e) {
+                        throw Exceptions.propagate(e);
+                    }
+                });
     }
 
     @DeleteMapping(value = "/{id}/heirs", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -77,7 +79,7 @@ public class MandateCommandController {
                                      @NotNull @Valid @RequestBody List<HeirPayload> heirs) throws Exception {
 
        /* RemoveHeirCommand command = new RemoveHeirCommand(id, mandateMapperService.convert(heirs.toArray(new HeirPayload[0])));
-        return mandateCommandService.removeHeir(command);*/
+        return mandateCommandService.removeHeirs(command);*/
         return Mono.just(true);
     }
 

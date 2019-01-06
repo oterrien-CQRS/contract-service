@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class MandateMapperService {
@@ -31,11 +30,11 @@ public class MandateMapperService {
         return business;
     }
 
-    public List<Heir> convert(HeirPayload... payload) {
+    public List<Heir> convert(List<HeirPayload> payload) {
         if (payload == null) {
             return null;
         }
-        List<Heir> business = Stream.of(payload).map(this::convert).collect(Collectors.toList());
+        List<Heir> business = payload.stream().map(this::convert).collect(Collectors.toList());
         return business;
     }
 

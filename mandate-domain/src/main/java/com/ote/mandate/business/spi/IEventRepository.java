@@ -10,4 +10,3 @@ public interface IEventRepository {
 
     Flux<IEvent> findAll(Mono<String> id);
 }
-

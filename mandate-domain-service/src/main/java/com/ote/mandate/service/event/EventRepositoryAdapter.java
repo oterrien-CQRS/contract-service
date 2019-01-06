@@ -38,11 +38,11 @@ public class EventRepositoryAdapter implements IEventRepository {
                     document.setCreatedTime(LocalDateTime.now());
                     document.setEvent(this.mandateEventMapperService.getEventToDocument().convert(evt));
                     return eventRepository.save(document).
-                            doOnSuccess(t -> log.debug("Event {} has been stored", evt.getClass().getSimpleName())).
-                            map(t -> evt);
+                            doOnSuccess(doc -> log.debug("Event {} has been stored", doc.getClass().getSimpleName())).
+                            map(doc -> evt);
                 }).
                 flatMap(evt -> eventPublisherService.publish(Mono.just(evt)).
-                        doOnSuccess(t -> log.debug("Event {} has been pushed", evt.getClass().getSimpleName()))
+                        doOnSuccess(bool -> log.debug("Event {} has been pushed", evt.getClass().getSimpleName()))
                 );
     }
 
