@@ -6,7 +6,7 @@ import com.ote.mandate.business.exception.MandateNotYetCreatedException;
 import com.ote.mandate.business.model.aggregate.Mandate;
 import com.ote.mandate.business.model.aggregate.MandateProjector;
 import com.ote.mandate.business.model.command.RemoveHeirsCommand;
-import com.ote.mandate.business.model.event.MandateHeirAddedEvent;
+import com.ote.mandate.business.model.event.MandateHeirRemovedEvent;
 import com.ote.mandate.business.spi.IEventRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class RemoveHeirsCommandService implements IRemoveHeirsCommandService {
 
         return command.
                 doOnNext(cmd -> log.debug("Trying to remove heirs : {}", cmd)).
-                flatMap(cmd -> getOrRaiseError(cmd, event -> !event.isEmpty(), () -> new MandateNotYetCreatedException(cmd.getId()), eventRepository)).
+                flatMap(cmd -> getOrRaiseError(cmd, events -> CollectionUtils.isNotEmpty(events), () -> new MandateNotYetCreatedException(cmd.getId()), eventRepository)).
                 map(tuple -> {
                     List<IEvent> events = tuple.getT2();
                     RemoveHeirsCommand cmd = tuple.getT1();
@@ -39,16 +39,17 @@ public class RemoveHeirsCommandService implements IRemoveHeirsCommandService {
                 flatMapMany(events -> Flux.fromStream(events.stream())).
                 flatMap(event -> eventRepository.storeAndPublish(Mono.just(event))).
                 collectList().
-                map(list -> list.stream().allMatch(p -> p == true));
+                map(list -> list.stream().anyMatch(p -> p == true)).
+                defaultIfEmpty(false);
     }
 
     private List<IEvent> createEvents(RemoveHeirsCommand command, List<IEvent> events) {
 
         try (MandateProjector mandateProjector = new MandateProjector()) {
-            Mandate mandate = mandateProjector.project(events);
+            Mandate mandate = mandateProjector.apply(events);
             return command.getOtherHeirs().stream().
                     filter(heir -> CollectionUtils.containsAny(mandate.getOtherHeirs(), heir)).
-                    map(heir -> new MandateHeirAddedEvent(command.getId(), heir)).
+                    map(heir -> new MandateHeirRemovedEvent(command.getId(), heir)).
                     collect(Collectors.toList());
         } catch (Exception e) {
             throw Exceptions.propagate(e);

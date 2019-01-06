@@ -11,6 +11,7 @@ import com.ote.mandate.business.spi.IEventRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 
@@ -29,7 +30,7 @@ public class DefineMainHeirCommandService implements IDefineMainHeirCommandServi
 
         return command.
                 doOnNext(cmd -> log.debug("Trying to define main heir : {}", cmd)).
-                flatMap(cmd -> getOrRaiseError(cmd, event -> !event.isEmpty(), () -> new MandateNotYetCreatedException(cmd.getId()), eventRepository)).
+                flatMap(cmd -> getOrRaiseError(cmd, events -> CollectionUtils.isNotEmpty(events), () -> new MandateNotYetCreatedException(cmd.getId()), eventRepository)).
                 map(tuple -> {
                     DefineMainHeirCommand cmd = tuple.getT1();
                     List<IEvent> events = tuple.getT2();
@@ -37,18 +38,19 @@ public class DefineMainHeirCommandService implements IDefineMainHeirCommandServi
                 }).
                 filter(opt -> opt.isPresent()).
                 map(opt -> opt.get()).
-                transform(event -> eventRepository.storeAndPublish(event));
+                transform(event -> eventRepository.storeAndPublish(event)).
+                defaultIfEmpty(false);
     }
 
     private Optional<IEvent> createEvents(DefineMainHeirCommand command, List<IEvent> events) {
 
         try (MandateProjector mandateProjector = new MandateProjector()) {
-            Mandate mandate = mandateProjector.project(events);
-
+            Mandate mandate = mandateProjector.apply(events);
             if (!Objects.equals(mandate.getMainHeir(), command.getMainHeir())) {
                 return Optional.of(new MandateMainHeirDefinedEvent(command.getId(), command.getMainHeir()));
+            } else {
+                return Optional.empty();
             }
-            return Optional.empty();
         } catch (Exception e) {
             throw Exceptions.propagate(e);
         }

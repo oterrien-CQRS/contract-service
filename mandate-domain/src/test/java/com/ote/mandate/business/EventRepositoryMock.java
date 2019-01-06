@@ -10,27 +10,32 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Slf4j
-public final class EventRepositoryMock implements IEventRepository {
+public class EventRepositoryMock implements IEventRepository {
 
-    private Map<Object, List<IEvent>> eventStore = new HashMap<>();
+    private final Map<String, List<IEvent>> eventStore = new HashMap<>();
 
     @Override
     public Mono<Boolean> storeAndPublish(Mono<IEvent> event) {
 
-        return event
-                .map(evt -> {
-                    log.info("Storing and publishing event {}", evt.getClass().getTypeName());
-                    eventStore.computeIfAbsent(evt.getId(), p -> new ArrayList<>()).add(evt);
-                    return true;
-                })
+        return event.
+                doOnNext(evt -> log.debug("#### MOCK - Storing and publishing event {}", evt.toString()))
+                .map(evt -> eventStore.computeIfAbsent(evt.getId(), p -> new ArrayList<>()).add(evt))
                 .onErrorReturn(false);
     }
 
     @Override
     public Flux<IEvent> findAll(Mono<String> id) {
-        return id.map(p -> eventStore.get(p)).flatMapIterable(ArrayList::new);
+        return id.
+                map(i -> eventStore.getOrDefault(i, new ArrayList<>())).
+                flatMapIterable(ArrayList::new);
+    }
+
+    public void initWith(IEvent... events) {
+
+        Stream.of(events).forEach(evt -> eventStore.computeIfAbsent(evt.getId(), p -> new ArrayList<>()).add(evt));
     }
 
     public void clean() {

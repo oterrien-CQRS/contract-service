@@ -9,6 +9,7 @@ import lombok.ToString;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -39,5 +40,9 @@ public class CreateMandateCommand extends BaseMandateCommand {
         this.notary = notary;
         this.mainHeir = mainHeir;
         this.otherHeirs = otherHeirs;
+    }
+
+    public CreateMandateCommand(String id, String bankName, Contractor contractor, Notary notary, Heir mainHeir, Heir... otherHeirs) {
+        this(id, bankName, contractor, notary, mainHeir, Arrays.asList(otherHeirs));
     }
 }

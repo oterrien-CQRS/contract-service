@@ -30,7 +30,7 @@ public class AddHeirsCommandService implements IAddHeirsCommandService {
 
         return command.
                 doOnNext(cmd -> log.debug("Trying to add heirs : {}", cmd)).
-                flatMap(cmd -> getOrRaiseError(cmd, event -> !event.isEmpty(), () -> new MandateNotYetCreatedException(cmd.getId()), eventRepository)).
+                flatMap(cmd -> getOrRaiseError(cmd, events -> CollectionUtils.isNotEmpty(events), () -> new MandateNotYetCreatedException(cmd.getId()), eventRepository)).
                 map(tuple -> {
                     AddHeirsCommand cmd = tuple.getT1();
                     List<IEvent> events = tuple.getT2();
@@ -39,13 +39,14 @@ public class AddHeirsCommandService implements IAddHeirsCommandService {
                 flatMapMany(events -> Flux.fromStream(events.stream())).
                 flatMap(event -> eventRepository.storeAndPublish(Mono.just(event))).
                 collectList().
-                map(list -> list.stream().allMatch(p -> p == true));
+                map(list -> list.stream().anyMatch(p -> p == true)).
+                defaultIfEmpty(false);
     }
 
     private List<IEvent> createEvents(AddHeirsCommand command, List<IEvent> events) {
 
         try (MandateProjector mandateProjector = new MandateProjector()) {
-            Mandate mandate = mandateProjector.project(events);
+            Mandate mandate = mandateProjector.apply(events);
             return command.getOtherHeirs().stream().
                     filter(heir -> !CollectionUtils.containsAny(mandate.getOtherHeirs(), heir)).
                     map(heir -> new MandateHeirAddedEvent(command.getId(), heir)).

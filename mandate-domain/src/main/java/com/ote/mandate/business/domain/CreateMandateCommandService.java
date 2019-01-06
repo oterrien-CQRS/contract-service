@@ -9,6 +9,7 @@ import com.ote.mandate.business.spi.IEventRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -23,11 +24,12 @@ public class CreateMandateCommandService implements ICreateMandateCommandService
     public Mono<Boolean> createMandate(Mono<CreateMandateCommand> command) {
         return command.
                 doOnNext(cmd -> log.debug("Trying to create mandate : {} ", cmd)).
-                flatMap(cmd -> getOrRaiseError(cmd, events -> events.isEmpty(), () -> new MandateAlreadyCreatedException(cmd.getId()), eventRepository)).
+                flatMap(cmd -> getOrRaiseError(cmd, events -> CollectionUtils.isEmpty(events), () -> new MandateAlreadyCreatedException(cmd.getId()), eventRepository)).
                 map(tuple -> createEvent(tuple.getT1())).
                 filter(opt -> opt.isPresent()).
                 map(opt -> opt.get()).
-                transform(event -> eventRepository.storeAndPublish(event));
+                transform(event -> eventRepository.storeAndPublish(event)).
+                defaultIfEmpty(false);
     }
 
     private Optional<IEvent> createEvent(CreateMandateCommand command) {

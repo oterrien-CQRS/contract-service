@@ -43,7 +43,8 @@ public class EventRepositoryAdapter implements IEventRepository {
                 }).
                 flatMap(evt -> eventPublisherService.publish(Mono.just(evt)).
                         doOnSuccess(bool -> log.debug("Event {} has been pushed", evt.getClass().getSimpleName()))
-                );
+                ).
+                onErrorReturn(false);
     }
 
 

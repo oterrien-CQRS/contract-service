@@ -26,7 +26,7 @@ public final class MandateProjector implements IProjector<Mandate> {
     }
 
     @Override
-    public Mandate project(List<IEvent> events) throws Exception {
+    public Mandate apply(List<IEvent> events) throws Exception {
 
         mandate = null;
 

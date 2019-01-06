@@ -6,13 +6,10 @@ import com.ote.mandate.business.exception.MandateAlreadyCreatedException;
 import com.ote.mandate.business.exception.MandateNotYetCreatedException;
 import com.ote.mandate.business.model.command.*;
 import com.ote.mandate.business.spi.IEventRepository;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Slf4j
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class MandateCommandService implements IMandateCommandService {
 
     private final ICreateMandateCommandService createMandateCommandService;

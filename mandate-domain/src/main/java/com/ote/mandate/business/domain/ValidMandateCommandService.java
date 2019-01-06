@@ -6,14 +6,14 @@ import com.ote.framework.Validable;
 import com.ote.mandate.business.api.IMandateCommandService;
 import com.ote.mandate.business.exception.MalformedCommandException;
 import com.ote.mandate.business.model.command.*;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @Slf4j
-public class ValidMandateCommandService implements IMandateCommandService {
+class ValidMandateCommandService implements IMandateCommandService {
 
     private final IMandateCommandService mandateCommandService;
 
@@ -52,11 +52,10 @@ public class ValidMandateCommandService implements IMandateCommandService {
                         log.debug("Command {} is valid", cmd);
                         return delegateFunction.apply(Mono.just(cmd));
                     } catch (Validable.NotValidException e) {
-                        throw Exceptions.propagate(new MalformedCommandException(e));
+                        return Mono.error(new MalformedCommandException(e));
                     } catch (Throwable e) {
-                        throw Exceptions.propagate(e);
+                        return Mono.error(e);
                     }
-                }).
-                defaultIfEmpty(false);
+                });
     }
 }

@@ -11,6 +11,7 @@ import com.ote.mandate.business.spi.IEventRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 
@@ -29,7 +30,7 @@ public class DefineNotaryCommandService implements IDefineNotaryCommandService {
 
         return command.
                 doOnNext(cmd -> log.debug("Trying to define notary : {}", cmd)).
-                flatMap(cmd -> getOrRaiseError(cmd, event -> !event.isEmpty(), () -> new MandateNotYetCreatedException(cmd.getId()), eventRepository)).
+                flatMap(cmd -> getOrRaiseError(cmd, events -> CollectionUtils.isNotEmpty(events), () -> new MandateNotYetCreatedException(cmd.getId()), eventRepository)).
                 map(tuple -> {
                     DefineNotaryCommand cmd = tuple.getT1();
                     List<IEvent> events = tuple.getT2();
@@ -37,18 +38,19 @@ public class DefineNotaryCommandService implements IDefineNotaryCommandService {
                 }).
                 filter(opt -> opt.isPresent()).
                 map(opt -> opt.get()).
-                transform(event -> eventRepository.storeAndPublish(event));
+                transform(event -> eventRepository.storeAndPublish(event)).
+                defaultIfEmpty(false);
     }
 
     private Optional<IEvent> createEvents(DefineNotaryCommand command, List<IEvent> events) {
 
         try (MandateProjector mandateProjector = new MandateProjector()) {
-            Mandate mandate = mandateProjector.project(events);
-
+            Mandate mandate = mandateProjector.apply(events);
             if (!Objects.equals(mandate.getNotary(), command.getNotary())) {
                 return Optional.of(new MandateNotaryDefinedEvent(command.getId(), command.getNotary()));
+            } else {
+                return Optional.empty();
             }
-            return Optional.empty();
         } catch (Exception e) {
             throw Exceptions.propagate(e);
         }
