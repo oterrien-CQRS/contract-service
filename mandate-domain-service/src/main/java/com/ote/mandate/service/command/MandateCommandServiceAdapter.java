@@ -27,12 +27,12 @@ public class MandateCommandServiceAdapter implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> addHeirs(Mono<AddHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> addHeirs(Mono<AddHeirsCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
         return this.mandateCommandService.addHeirs(command);
     }
 
     @Override
-    public Mono<Boolean> removeHeirs(Mono<RemoveHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
+    public Mono<Boolean> removeHeirs(Mono<RemoveHeirsCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
         return this.mandateCommandService.removeHeirs(command);
     }
 

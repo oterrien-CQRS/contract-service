@@ -23,12 +23,12 @@ public class ValidMandateCommandService implements IMandateCommandService {
     }
 
     @Override
-    public Mono<Boolean> addHeirs(Mono<AddHeirCommand> command) {
+    public Mono<Boolean> addHeirs(Mono<AddHeirsCommand> command) {
         return delegateWithValidation(command, mandateCommandService::addHeirs);
     }
 
     @Override
-    public Mono<Boolean> removeHeirs(Mono<RemoveHeirCommand> command) {
+    public Mono<Boolean> removeHeirs(Mono<RemoveHeirsCommand> command) {
         return delegateWithValidation(command, mandateCommandService::removeHeirs);
     }
 
@@ -43,9 +43,9 @@ public class ValidMandateCommandService implements IMandateCommandService {
     }
 
     private static <T extends ICommand> Mono<Boolean> delegateWithValidation(Mono<T> command,
-                                                                             CheckedFunction<Mono<T>, Mono<Boolean>> delegateFunction) {
+                                                                             CheckedFunction.Function1<Mono<T>, Mono<Boolean>> delegateFunction) {
         return command.
-                doOnNext(cmd -> log.debug("Trying to validated the command {}", cmd)).
+                doOnNext(cmd -> log.debug("Validating the command {}", cmd)).
                 flatMap(cmd -> {
                     try {
                         cmd.validate();

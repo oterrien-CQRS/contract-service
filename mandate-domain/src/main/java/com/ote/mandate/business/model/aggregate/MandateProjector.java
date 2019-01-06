@@ -6,45 +6,38 @@ import com.ote.framework.IProjector;
 import com.ote.mandate.business.exception.MandateAlreadyCreatedException;
 import com.ote.mandate.business.exception.MandateNotYetCreatedException;
 import com.ote.mandate.business.model.event.*;
-import lombok.NoArgsConstructor;
-import reactor.core.Exceptions;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
+import java.util.List;
 
-@NoArgsConstructor
 public final class MandateProjector implements IProjector<Mandate> {
 
     private final EventHandlers eventHandlers = new EventHandlers();
 
     private Mandate mandate;
 
-    @Override
-    public Mono<Mandate> project(Flux<IEvent> events) {
-
-        return events.
-                doOnSubscribe((s) -> {
-                    eventHandlers.bind(MandateCreatedEvent.class, this::handle);
-                    eventHandlers.bind(MandateHeirAddedEvent.class, this::handle);
-                    eventHandlers.bind(MandateHeirRemovedEvent.class, this::handle);
-                    eventHandlers.bind(MandateMainHeirDefinedEvent.class, this::handle);
-                    eventHandlers.bind(MandateNotaryDefinedEvent.class, this::handle);
-
-                    mandate = null;
-                }).
-                map(evt -> {
-                    try {
-                        eventHandlers.handle(evt);
-                        return evt;
-                    } catch (Throwable throwable) {
-                        throw Exceptions.propagate(throwable);
-                    }
-                }).collect(Collectors.toList()).
-                map(list -> mandate);
+    public MandateProjector() {
+        eventHandlers.bind(MandateCreatedEvent.class, this::handle);
+        eventHandlers.bind(MandateHeirAddedEvent.class, this::handle);
+        eventHandlers.bind(MandateHeirRemovedEvent.class, this::handle);
+        eventHandlers.bind(MandateMainHeirDefinedEvent.class, this::handle);
+        eventHandlers.bind(MandateNotaryDefinedEvent.class, this::handle);
     }
 
+    @Override
+    public Mandate project(List<IEvent> events) throws Exception {
+
+        mandate = null;
+
+        if (CollectionUtils.isNotEmpty(events)) {
+            eventHandlers.handle(events);
+        }
+
+        return mandate;
+    }
+
+    // region <<Region event handler methods>>
     private void handle(MandateCreatedEvent event) throws MandateAlreadyCreatedException {
 
         if (mandate != null) {
@@ -101,9 +94,11 @@ public final class MandateProjector implements IProjector<Mandate> {
 
         mandate.setNotary(event.getNotary());
     }
+    // endregion
 
     @Override
     public void close() {
         eventHandlers.close();
+        mandate = null;
     }
 }

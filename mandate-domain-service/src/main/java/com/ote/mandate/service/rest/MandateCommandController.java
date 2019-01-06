@@ -1,8 +1,7 @@
 package com.ote.mandate.service.rest;
 
 import com.ote.mandate.business.api.IMandateCommandService;
-import com.ote.mandate.business.model.command.AddHeirCommand;
-import com.ote.mandate.business.model.command.CreateMandateCommand;
+import com.ote.mandate.business.model.command.*;
 import com.ote.mandate.service.rest.payload.HeirPayload;
 import com.ote.mandate.service.rest.payload.MandatePayload;
 import com.ote.mandate.service.rest.payload.NotaryPayload;
@@ -18,7 +17,6 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -63,7 +61,7 @@ public class MandateCommandController {
 
         return heirs.
                 collect(Collectors.toList()).
-                map(list -> new AddHeirCommand(id, mandateMapperService.convert(list))).
+                map(list -> new AddHeirsCommand(id, mandateMapperService.convert(list))).
                 flatMap(cmd -> {
                     try {
                         return mandateCommandService.addHeirs(Mono.just(cmd));
@@ -76,30 +74,49 @@ public class MandateCommandController {
     @DeleteMapping(value = "/{id}/heirs", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public Mono<Boolean> removeHeirs(@PathVariable String id,
-                                     @NotNull @Valid @RequestBody List<HeirPayload> heirs) throws Exception {
+                                     @NotNull @Valid @RequestBody Flux<HeirPayload> heirs) throws Exception {
 
-       /* RemoveHeirCommand command = new RemoveHeirCommand(id, mandateMapperService.convert(heirs.toArray(new HeirPayload[0])));
-        return mandateCommandService.removeHeirs(command);*/
-        return Mono.just(true);
+        return heirs.
+                collect(Collectors.toList()).
+                map(list -> new RemoveHeirsCommand(id, mandateMapperService.convert(list))).
+                flatMap(cmd -> {
+                    try {
+                        return mandateCommandService.removeHeirs(Mono.just(cmd));
+                    } catch (Exception e) {
+                        throw Exceptions.propagate(e);
+                    }
+                });
     }
 
     @PutMapping(value = "/{id}/mainHeir", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public Mono<Boolean> defineMainHeir(@PathVariable String id,
-                                        @NotNull @Valid @RequestBody HeirPayload mainHeir) throws Exception {
+                                        @NotNull @Valid @RequestBody Mono<HeirPayload> mainHeir) throws Exception {
 
-        /*DefineMainHeirCommand command = new DefineMainHeirCommand(id, mandateMapperService.convert(mainHeir));
-        return mandateCommandService.defineMainHeir(command);*/
-        return Mono.just(true);
+        return mainHeir.
+                map(heir -> new DefineMainHeirCommand(id, mandateMapperService.convert(heir)))
+                .transform(cmd -> {
+                    try {
+                        return mandateCommandService.defineMainHeir(cmd);
+                    } catch (Exception e) {
+                        throw Exceptions.propagate(e);
+                    }
+                });
     }
 
     @PutMapping(value = "/{id}/notary", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public Mono<Boolean> defineNotary(@PathVariable String id,
-                                      @NotNull @Valid @RequestBody NotaryPayload notary) throws Exception {
+                                      @NotNull @Valid @RequestBody Mono<NotaryPayload> notary) throws Exception {
 
-       /* DefineNotaryCommand command = new DefineNotaryCommand(id, mandateMapperService.convert(notary));
-        return mandateCommandService.defineNotary(command);*/
-        return Mono.just(true);
+        return notary.
+                map(n -> new DefineNotaryCommand(id, mandateMapperService.convert(n)))
+                .transform(cmd -> {
+                    try {
+                        return mandateCommandService.defineNotary(cmd);
+                    } catch (Exception e) {
+                        throw Exceptions.propagate(e);
+                    }
+                });
     }
 }

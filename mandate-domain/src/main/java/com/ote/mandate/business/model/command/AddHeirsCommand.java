@@ -10,13 +10,13 @@ import java.util.List;
 
 @Getter
 @ToString(callSuper = true)
-public class RemoveHeirCommand extends BaseMandateCommand {
+public class AddHeirsCommand extends BaseMandateCommand {
 
     @NotEmpty
     @Valid
     private final List<Heir> otherHeirs;
 
-    public RemoveHeirCommand(String id, List<Heir> otherHeirs) {
+    public AddHeirsCommand(String id, List<Heir> otherHeirs) {
         super(id);
         this.otherHeirs = otherHeirs;
     }
