@@ -13,8 +13,10 @@ import java.util.function.Supplier;
 
 public interface ICommandHandler {
 
-    default <T extends ICommand> Mono<Tuple2<T, List<IEvent>>> getOrRaiseError(T command, Predicate<List<IEvent>> successCondition, Supplier<Throwable> errorRaised, IEventRepository eventRepository) {
-
+    default <T extends ICommand> Mono<Tuple2<T, List<IEvent>>> getOrRaiseError(T command,
+                                                                               Predicate<List<IEvent>> successCondition,
+                                                                               Supplier<Throwable> errorRaised,
+                                                                               IEventRepository eventRepository) {
         return eventRepository.
                 findAll(Mono.just(command.getId())).
                 collectList().

@@ -19,31 +19,31 @@ class ValidMandateCommandService implements IMandateCommandService {
 
     @Override
     public Mono<Boolean> createMandate(Mono<CreateMandateCommand> command) {
-        return delegateWithValidation(command, mandateCommandService::createMandate);
+        return withValidation(command, mandateCommandService::createMandate);
     }
 
     @Override
     public Mono<Boolean> addHeirs(Mono<AddHeirsCommand> command) {
-        return delegateWithValidation(command, mandateCommandService::addHeirs);
+        return withValidation(command, mandateCommandService::addHeirs);
     }
 
     @Override
     public Mono<Boolean> removeHeirs(Mono<RemoveHeirsCommand> command) {
-        return delegateWithValidation(command, mandateCommandService::removeHeirs);
+        return withValidation(command, mandateCommandService::removeHeirs);
     }
 
     @Override
     public Mono<Boolean> defineMainHeir(Mono<DefineMainHeirCommand> command) {
-        return delegateWithValidation(command, mandateCommandService::defineMainHeir);
+        return withValidation(command, mandateCommandService::defineMainHeir);
     }
 
     @Override
     public Mono<Boolean> defineNotary(Mono<DefineNotaryCommand> command) {
-        return delegateWithValidation(command, mandateCommandService::defineNotary);
+        return withValidation(command, mandateCommandService::defineNotary);
     }
 
-    private static <T extends ICommand> Mono<Boolean> delegateWithValidation(Mono<T> command,
-                                                                             CheckedFunction.Function1<Mono<T>, Mono<Boolean>> delegateFunction) {
+    private static <T extends ICommand> Mono<Boolean> withValidation(Mono<T> command,
+                                                                     CheckedFunction.Function1<Mono<T>, Mono<Boolean>> delegateFunction) {
         return command.
                 doOnNext(cmd -> log.debug("Validating the command {}", cmd)).
                 flatMap(cmd -> {

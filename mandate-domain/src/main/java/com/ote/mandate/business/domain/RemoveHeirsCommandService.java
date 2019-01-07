@@ -15,13 +15,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class RemoveHeirsCommandService implements IRemoveHeirsCommandService {
+class RemoveHeirsCommandService implements IRemoveHeirsCommandService {
 
     private final IEventRepository eventRepository;
 
@@ -31,15 +32,15 @@ public class RemoveHeirsCommandService implements IRemoveHeirsCommandService {
         return command.
                 doOnNext(cmd -> log.debug("Trying to remove heirs : {}", cmd)).
                 flatMap(cmd -> getOrRaiseError(cmd, events -> CollectionUtils.isNotEmpty(events), () -> new MandateNotYetCreatedException(cmd.getId()), eventRepository)).
-                map(tuple -> {
-                    List<IEvent> events = tuple.getT2();
-                    RemoveHeirsCommand cmd = tuple.getT1();
-                    return createEvents(cmd, events);
-                }).
+                map(this::createEvents).
                 flatMapMany(events -> Flux.fromStream(events.stream())).
                 flatMap(event -> eventRepository.storeAndPublish(Mono.just(event))).
                 collectList().
                 map(list -> list.stream().anyMatch(p -> p == true));
+    }
+
+    private List<IEvent> createEvents(Tuple2<RemoveHeirsCommand, List<IEvent>> tuple) {
+        return createEvents(tuple.getT1(), tuple.getT2());
     }
 
     private List<IEvent> createEvents(RemoveHeirsCommand command, List<IEvent> events) {

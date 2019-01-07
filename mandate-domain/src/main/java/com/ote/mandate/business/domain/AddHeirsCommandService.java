@@ -15,13 +15,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class AddHeirsCommandService implements IAddHeirsCommandService {
+class AddHeirsCommandService implements IAddHeirsCommandService {
 
     private final IEventRepository eventRepository;
 
@@ -31,15 +32,15 @@ public class AddHeirsCommandService implements IAddHeirsCommandService {
         return command.
                 doOnNext(cmd -> log.debug("Trying to add heirs : {}", cmd)).
                 flatMap(cmd -> getOrRaiseError(cmd, events -> CollectionUtils.isNotEmpty(events), () -> new MandateNotYetCreatedException(cmd.getId()), eventRepository)).
-                map(tuple -> {
-                    AddHeirsCommand cmd = tuple.getT1();
-                    List<IEvent> events = tuple.getT2();
-                    return createEvents(cmd, events);
-                }).
+                map(this::createEvents).
                 flatMapMany(events -> Flux.fromStream(events.stream())).
                 flatMap(event -> eventRepository.storeAndPublish(Mono.just(event))).
                 collectList().
                 map(list -> list.stream().anyMatch(p -> p == true));
+    }
+
+    private List<IEvent> createEvents(Tuple2<AddHeirsCommand, List<IEvent>> tuple) {
+        return createEvents(tuple.getT1(), tuple.getT2());
     }
 
     private List<IEvent> createEvents(AddHeirsCommand command, List<IEvent> events) {

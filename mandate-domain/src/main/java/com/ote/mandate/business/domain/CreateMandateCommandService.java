@@ -11,12 +11,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class CreateMandateCommandService implements ICreateMandateCommandService {
+class CreateMandateCommandService implements ICreateMandateCommandService {
 
     private final IEventRepository eventRepository;
 
@@ -25,12 +27,12 @@ public class CreateMandateCommandService implements ICreateMandateCommandService
         return command.
                 doOnNext(cmd -> log.debug("Trying to create mandate : {} ", cmd)).
                 flatMap(cmd -> getOrRaiseError(cmd, events -> CollectionUtils.isEmpty(events), () -> new MandateAlreadyCreatedException(cmd.getId()), eventRepository)).
-                map(tuple -> createEvent(tuple.getT1())).
+                map(this::createEvent).
                 flatMap(event -> event.map(p -> eventRepository.storeAndPublish(Mono.just(p))).orElse(Mono.just(false)));
     }
 
-    private Optional<IEvent> createEvent(CreateMandateCommand command) {
-
+    private Optional<IEvent> createEvent(Tuple2<CreateMandateCommand, List<IEvent>> tuple) {
+        CreateMandateCommand command = tuple.getT1();
         MandateCreatedEvent event = new MandateCreatedEvent(command.getId(), command.getBankName(), command.getContractor());
         if (!command.getOtherHeirs().isEmpty()) {
             event.getOtherHeirs().addAll(command.getOtherHeirs());
