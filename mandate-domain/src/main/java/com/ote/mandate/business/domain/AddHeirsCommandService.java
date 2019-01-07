@@ -39,8 +39,7 @@ public class AddHeirsCommandService implements IAddHeirsCommandService {
                 flatMapMany(events -> Flux.fromStream(events.stream())).
                 flatMap(event -> eventRepository.storeAndPublish(Mono.just(event))).
                 collectList().
-                map(list -> list.stream().anyMatch(p -> p == true)).
-                defaultIfEmpty(false);
+                map(list -> list.stream().anyMatch(p -> p == true));
     }
 
     private List<IEvent> createEvents(AddHeirsCommand command, List<IEvent> events) {

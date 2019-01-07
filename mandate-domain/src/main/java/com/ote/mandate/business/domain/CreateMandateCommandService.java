@@ -26,10 +26,7 @@ public class CreateMandateCommandService implements ICreateMandateCommandService
                 doOnNext(cmd -> log.debug("Trying to create mandate : {} ", cmd)).
                 flatMap(cmd -> getOrRaiseError(cmd, events -> CollectionUtils.isEmpty(events), () -> new MandateAlreadyCreatedException(cmd.getId()), eventRepository)).
                 map(tuple -> createEvent(tuple.getT1())).
-                filter(opt -> opt.isPresent()).
-                map(opt -> opt.get()).
-                transform(event -> eventRepository.storeAndPublish(event)).
-                defaultIfEmpty(false);
+                flatMap(event -> event.map(p -> eventRepository.storeAndPublish(Mono.just(p))).orElse(Mono.just(false)));
     }
 
     private Optional<IEvent> createEvent(CreateMandateCommand command) {

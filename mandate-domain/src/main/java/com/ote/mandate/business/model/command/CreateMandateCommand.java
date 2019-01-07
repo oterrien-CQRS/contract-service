@@ -9,8 +9,9 @@ import lombok.ToString;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Getter
 @ToString(callSuper = true)
@@ -31,9 +32,9 @@ public class CreateMandateCommand extends BaseMandateCommand {
     private final Heir mainHeir;
 
     @Valid
-    private final List<Heir> otherHeirs;
+    private final Set<Heir> otherHeirs;
 
-    public CreateMandateCommand(String id, String bankName, Contractor contractor, Notary notary, Heir mainHeir, List<Heir> otherHeirs) {
+    public CreateMandateCommand(String id, String bankName, Contractor contractor, Notary notary, Heir mainHeir, Set<Heir> otherHeirs) {
         super(id);
         this.bankName = bankName;
         this.contractor = contractor;
@@ -43,6 +44,6 @@ public class CreateMandateCommand extends BaseMandateCommand {
     }
 
     public CreateMandateCommand(String id, String bankName, Contractor contractor, Notary notary, Heir mainHeir, Heir... otherHeirs) {
-        this(id, bankName, contractor, notary, mainHeir, Arrays.asList(otherHeirs));
+        this(id, bankName, contractor, notary, mainHeir, Stream.of(otherHeirs).collect(Collectors.toSet()));
     }
 }

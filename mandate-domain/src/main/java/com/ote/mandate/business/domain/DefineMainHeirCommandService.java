@@ -36,10 +36,7 @@ public class DefineMainHeirCommandService implements IDefineMainHeirCommandServi
                     List<IEvent> events = tuple.getT2();
                     return createEvents(cmd, events);
                 }).
-                filter(opt -> opt.isPresent()).
-                map(opt -> opt.get()).
-                transform(event -> eventRepository.storeAndPublish(event)).
-                defaultIfEmpty(false);
+                flatMap(event -> event.map(p -> eventRepository.storeAndPublish(Mono.just(p))).orElse(Mono.just(false)));
     }
 
     private Optional<IEvent> createEvents(DefineMainHeirCommand command, List<IEvent> events) {

@@ -39,8 +39,7 @@ public class RemoveHeirsCommandService implements IRemoveHeirsCommandService {
                 flatMapMany(events -> Flux.fromStream(events.stream())).
                 flatMap(event -> eventRepository.storeAndPublish(Mono.just(event))).
                 collectList().
-                map(list -> list.stream().anyMatch(p -> p == true)).
-                defaultIfEmpty(false);
+                map(list -> list.stream().anyMatch(p -> p == true));
     }
 
     private List<IEvent> createEvents(RemoveHeirsCommand command, List<IEvent> events) {
