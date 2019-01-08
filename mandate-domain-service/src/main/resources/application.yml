@@ -7,6 +7,7 @@ logging:
     kafka.*: WARN
     org.springframework.*: INFO
     org.apache.kafka.*: ERROR
+    com.ote.*: DEBUG
 
 spring:
   data:

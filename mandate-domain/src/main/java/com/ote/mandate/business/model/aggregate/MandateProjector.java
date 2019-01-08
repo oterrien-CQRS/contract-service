@@ -6,6 +6,7 @@ import com.ote.framework.IProjector;
 import com.ote.mandate.business.exception.MandateAlreadyCreatedException;
 import com.ote.mandate.business.exception.MandateNotYetCreatedException;
 import com.ote.mandate.business.model.event.*;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,17 +26,18 @@ public final class MandateProjector implements IProjector<Mandate> {
     }
 
     @Override
-    public Mandate project(List<IEvent> events) throws Exception {
+    public Mandate apply(List<IEvent> events) throws Exception {
 
         mandate = null;
 
-        if (events != null) {
-            eventHandlers.handle(events.toArray(new IEvent[0]));
+        if (CollectionUtils.isNotEmpty(events)) {
+            eventHandlers.handle(events);
         }
 
         return mandate;
     }
 
+    // region <<Region event handler methods>>
     private void handle(MandateCreatedEvent event) throws MandateAlreadyCreatedException {
 
         if (mandate != null) {
@@ -70,11 +72,9 @@ public final class MandateProjector implements IProjector<Mandate> {
             throw new MandateNotYetCreatedException(event.getId());
         }
 
-        if (mandate.getOtherHeirs() == null) {
-            mandate.setOtherHeirs(new ArrayList<>());
+        if (mandate.getOtherHeirs() != null) {
+            mandate.getOtherHeirs().remove(event.getHeir());
         }
-
-        mandate.getOtherHeirs().remove(event.getHeir());
     }
 
     private void handle(MandateMainHeirDefinedEvent event) throws MandateNotYetCreatedException {
@@ -94,9 +94,11 @@ public final class MandateProjector implements IProjector<Mandate> {
 
         mandate.setNotary(event.getNotary());
     }
+    // endregion
 
     @Override
     public void close() {
         eventHandlers.close();
+        mandate = null;
     }
 }

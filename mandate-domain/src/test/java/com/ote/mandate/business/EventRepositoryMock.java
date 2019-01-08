@@ -2,25 +2,40 @@ package com.ote.mandate.business;
 
 import com.ote.framework.IEvent;
 import com.ote.mandate.business.spi.IEventRepository;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+@Slf4j
 public class EventRepositoryMock implements IEventRepository {
 
-    private Map<Object, List<IEvent>> eventStore = new HashMap<>();
+    private final Map<String, List<IEvent>> eventStore = new HashMap<>();
 
     @Override
-    public void storeAndPublish(IEvent event) {
-        System.out.println("Storing and publishing event " + event.getClass().getTypeName());
-        eventStore.computeIfAbsent(event.getId(), p -> new ArrayList<>()).add(event);
+    public Mono<Boolean> storeAndPublish(Mono<IEvent> event) {
+
+        return event.
+                doOnNext(evt -> log.debug("#### MOCK - Storing and publishing event {}", evt.toString()))
+                .map(evt -> eventStore.computeIfAbsent(evt.getId(), p -> new ArrayList<>()).add(evt))
+                .onErrorReturn(false);
     }
 
     @Override
-    public List<IEvent> findAll(String id) {
-        return eventStore.get(id);
+    public Flux<IEvent> findAll(Mono<String> id) {
+        return id.
+                map(i -> eventStore.getOrDefault(i, new ArrayList<>())).
+                flatMapIterable(ArrayList::new);
+    }
+
+    public void initWith(IEvent... events) {
+
+        Stream.of(events).forEach(evt -> eventStore.computeIfAbsent(evt.getId(), p -> new ArrayList<>()).add(evt));
     }
 
     public void clean() {

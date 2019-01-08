@@ -11,8 +11,8 @@ import com.ote.mandate.service.rest.payload.NotaryPayload;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class MandateMapperService {
@@ -31,11 +31,11 @@ public class MandateMapperService {
         return business;
     }
 
-    public List<Heir> convert(HeirPayload... payload) {
+    public Set<Heir> convert(List<HeirPayload> payload) {
         if (payload == null) {
             return null;
         }
-        List<Heir> business = Stream.of(payload).map(this::convert).collect(Collectors.toList());
+        Set<Heir> business = payload.stream().map(this::convert).collect(Collectors.toSet());
         return business;
     }
 

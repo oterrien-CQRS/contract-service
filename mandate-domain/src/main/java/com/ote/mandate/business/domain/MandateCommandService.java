@@ -1,180 +1,53 @@
 package com.ote.mandate.business.domain;
 
-import com.ote.framework.IEvent;
-import com.ote.mandate.business.api.IMandateCommandService;
+import com.ote.mandate.business.api.*;
+import com.ote.mandate.business.exception.MalformedCommandException;
 import com.ote.mandate.business.exception.MandateAlreadyCreatedException;
 import com.ote.mandate.business.exception.MandateNotYetCreatedException;
-import com.ote.mandate.business.model.aggregate.Mandate;
-import com.ote.mandate.business.model.aggregate.MandateProjector;
 import com.ote.mandate.business.model.command.*;
-import com.ote.mandate.business.model.event.*;
 import com.ote.mandate.business.spi.IEventRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 class MandateCommandService implements IMandateCommandService {
 
-    private final IEventRepository eventRepository;
+    private final ICreateMandateCommandService createMandateCommandService;
+    private final IAddHeirsCommandService addHeirsCommandService;
+    private final IRemoveHeirsCommandService removeHeirsCommandService;
+    private final IDefineMainHeirCommandService defineMainHeirCommandService;
+    private final IDefineNotaryCommandService defineNotaryCommandService;
 
     MandateCommandService(IEventRepository eventRepository) {
-        this.eventRepository = eventRepository;
+        this.createMandateCommandService = new CreateMandateCommandService(eventRepository);
+        this.addHeirsCommandService = new AddHeirsCommandService(eventRepository);
+        this.removeHeirsCommandService = new RemoveHeirsCommandService(eventRepository);
+        this.defineMainHeirCommandService = new DefineMainHeirCommandService(eventRepository);
+        this.defineNotaryCommandService = new DefineNotaryCommandService(eventRepository);
     }
 
     @Override
-    public void apply(CreateMandateCommand command) throws MandateAlreadyCreatedException {
-
-        log.debug("Trying to apply command : " + command);
-
-        String id = command.getId();
-
-        if (CollectionUtils.isNotEmpty(eventRepository.findAll(id))) {
-            throw new MandateAlreadyCreatedException(id);
-        }
-
-        MandateCreatedEvent event = new MandateCreatedEvent(id, command.getBankName(), command.getContractor());
-        if (!command.getOtherHeirs().isEmpty()) {
-            event.getOtherHeirs().addAll(command.getOtherHeirs());
-        }
-        event.setMainHeir(command.getMainHeir());
-        event.setNotary(command.getNotary());
-
-        eventRepository.storeAndPublish(event);
+    public Mono<Boolean> createMandate(Mono<CreateMandateCommand> command) throws MalformedCommandException, MandateAlreadyCreatedException {
+        return createMandateCommandService.createMandate(command);
     }
 
     @Override
-    public void apply(AddHeirCommand command) throws MandateNotYetCreatedException {
-        try {
-            log.debug("Trying to apply command : " + command);
-
-            String id = command.getId();
-
-            List<IEvent> allEvents = eventRepository.findAll(id);
-            if (CollectionUtils.isEmpty(allEvents)) {
-                throw new MandateNotYetCreatedException(id);
-            }
-
-            // Apply events to create latest state of mandate
-            try (MandateProjector mandateProjector = new MandateProjector()) {
-                Mandate mandate = mandateProjector.project(allEvents);
-                // Generate a MandateHeirAddedEvent only for heirs which are not yet added
-                AtomicBoolean areElementsProcessed = new AtomicBoolean(false);
-                command.getOtherHeirs().stream().
-                        filter(heir -> !mandate.getOtherHeirs().contains(heir)).
-                        peek(heir -> areElementsProcessed.set(true)).
-                        forEach(heir -> {
-                            MandateHeirAddedEvent event = new MandateHeirAddedEvent(id, heir);
-                            eventRepository.storeAndPublish(event);
-                        });
-
-                if (!areElementsProcessed.get()) {
-                    log.debug("All these heirs have already been added to mandate {}", id);
-                }
-            }
-        } catch (MandateNotYetCreatedException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public Mono<Boolean> addHeirs(Mono<AddHeirsCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
+        return addHeirsCommandService.addHeirs(command);
     }
 
     @Override
-    public void apply(RemoveHeirCommand command) throws MandateNotYetCreatedException {
-        try {
-            log.debug("Trying to apply command : " + command);
-
-            String id = command.getId();
-
-            List<IEvent> allEvents = eventRepository.findAll(id);
-            if (CollectionUtils.isEmpty(allEvents)) {
-                throw new MandateNotYetCreatedException(id);
-            }
-
-            // Apply events to create latest state of mandate
-            try (MandateProjector mandateProjector = new MandateProjector()) {
-                Mandate mandate = mandateProjector.project(allEvents);
-                // Generate a MandateHeirRemovedEvent only for heirs which are not yet removed
-                AtomicBoolean areElementsProcessed = new AtomicBoolean(false);
-                command.getOtherHeirs().stream().
-                        filter(heir -> mandate.getOtherHeirs().contains(heir)).
-                        peek(heir -> areElementsProcessed.set(true)).
-                        forEach(heir -> {
-                            MandateHeirRemovedEvent event = new MandateHeirRemovedEvent(id, heir);
-                            eventRepository.storeAndPublish(event);
-                        });
-
-                if (!areElementsProcessed.get()) {
-                    log.debug("All these heirs have already been added to mandate {}", id);
-                }
-            }
-        } catch (MandateNotYetCreatedException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public Mono<Boolean> removeHeirs(Mono<RemoveHeirsCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
+        return removeHeirsCommandService.removeHeirs(command);
     }
 
     @Override
-    public void apply(DefineMainHeirCommand command) throws MandateNotYetCreatedException {
-        try {
-            log.debug("Trying to apply command : " + command);
-
-            String id = command.getId();
-
-            List<IEvent> allEvents = eventRepository.findAll(id);
-            if (CollectionUtils.isEmpty(allEvents)) {
-                throw new MandateNotYetCreatedException(id);
-            }
-
-            // Apply events to create latest state of mandate
-            try (MandateProjector mandateProjector = new MandateProjector()) {
-                Mandate mandate = mandateProjector.project(allEvents);
-                // Generate a MandateMainHeirDefinedEvent only if this main heir is not yet defined
-                if (!Objects.equals(mandate.getMainHeir(), command.getMainHeir())) {
-                    MandateMainHeirDefinedEvent event = new MandateMainHeirDefinedEvent(id, command.getMainHeir());
-                    eventRepository.storeAndPublish(event);
-                } else {
-                    log.debug("This heir is already defined as main for mandate {}", id);
-                }
-            }
-        } catch (MandateNotYetCreatedException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public Mono<Boolean> defineMainHeir(Mono<DefineMainHeirCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
+        return defineMainHeirCommandService.defineMainHeir(command);
     }
 
     @Override
-    public void apply(DefineNotaryCommand command) throws MandateNotYetCreatedException {
-        try {
-            log.debug("Trying to apply command : " + command);
-
-            String id = command.getId();
-
-            List<IEvent> allEvents = eventRepository.findAll(id);
-            if (CollectionUtils.isEmpty(allEvents)) {
-                throw new MandateNotYetCreatedException(id);
-            }
-
-            // Apply events to project to  mandate
-            try (MandateProjector mandateProjector = new MandateProjector()) {
-                Mandate mandate = mandateProjector.project(allEvents);
-                // Generate a MandateNotaryDefinedEvent only if this notary is not yet defined
-                if (!Objects.equals(mandate.getNotary(), command.getNotary())) {
-                    MandateNotaryDefinedEvent event = new MandateNotaryDefinedEvent(id, command.getNotary());
-                    eventRepository.storeAndPublish(event);
-                } else {
-                    log.debug("This notary is already defined as main for mandate {}", id);
-                }
-            }
-        } catch (MandateNotYetCreatedException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public Mono<Boolean> defineNotary(Mono<DefineNotaryCommand> command) throws MalformedCommandException, MandateNotYetCreatedException {
+        return defineNotaryCommandService.defineNotary(command);
     }
 }

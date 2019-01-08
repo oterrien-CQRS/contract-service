@@ -1,21 +1,21 @@
 package com.ote.framework;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public final class EventHandlers implements AutoCloseable {
 
-    private final Map<String, IEventHandler<? extends IEvent>> eventHandlers = new HashMap<>();
+    private final Map<String, CheckedConsumer.Consumer1<? extends IEvent>> eventHandlers = new HashMap<>();
 
-    public <T extends IEvent> void bind(Class<T> eventClass, IEventHandler<T> eventHandler) {
+    public <T extends IEvent> void bind(Class<T> eventClass, CheckedConsumer.Consumer1<T> eventHandler) {
         eventHandlers.put(eventClass.getTypeName(), eventHandler);
     }
 
-    public <T extends IEvent> void handle(T... events) throws Exception {
+    public <T extends IEvent> void handle(List<T> events) throws Exception {
         try {
-            Stream.of(events).forEach(event -> {
+            events.forEach(event -> {
                 try {
                     handle(event);
                 } catch (Exception e) {
@@ -29,9 +29,10 @@ public final class EventHandlers implements AutoCloseable {
 
     @SuppressWarnings("unchecked")
     public <T extends IEvent> void handle(T event) throws Exception {
-        IEventHandler eventHandler = Optional.ofNullable(eventHandlers.get(event.getClass().getTypeName())).
+
+        CheckedConsumer.Consumer1 eventHandler = Optional.ofNullable(eventHandlers.get(event.getClass().getTypeName())).
                 orElseThrow(() -> new MissingEventBindingException(event.getClass()));
-        eventHandler.handle(event);
+        eventHandler.apply(event);
     }
 
     @Override
@@ -46,11 +47,5 @@ public final class EventHandlers implements AutoCloseable {
         MissingEventBindingException(Class eventClass) {
             super(String.format(MESSAGE_TEMPLATE, eventClass.getTypeName()));
         }
-    }
-
-    @FunctionalInterface
-    public interface IEventHandler<TE> {
-
-        void handle(TE event) throws Exception;
     }
 }
