@@ -28,12 +28,11 @@ public class MandateServiceTest {
     @Spy
     private EventRepositoryMock eventRepository = new EventRepositoryMock();
 
-    private IMandateCommandService mandateService;
+    private IMandateCommandService mandateService = MandateServiceProvider.getInstance().getFactory().createService(eventRepository);
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mandateService = MandateServiceProvider.getInstance().getFactory().createService(eventRepository);
     }
 
     @After
