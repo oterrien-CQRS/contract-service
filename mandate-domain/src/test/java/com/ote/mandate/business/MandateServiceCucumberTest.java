@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 @RunWith(Cucumber.class)
 @CucumberOptions(
         plugin = {"pretty"},
-        features = "src/test/resources/*.feature",
+        features = "src/test/resources/mandatesOperation.feature",
         tags = {"~@Ignore"},
         glue = "com.ote.mandate.business")
 public class MandateServiceCucumberTest {
