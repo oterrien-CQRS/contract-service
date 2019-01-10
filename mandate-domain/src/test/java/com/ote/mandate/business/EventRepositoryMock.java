@@ -1,7 +1,7 @@
 package com.ote.mandate.business;
 
-import com.ote.framework.IEvent;
-import com.ote.mandate.business.spi.IEventRepository;
+import com.ote.common.cqrs.IEvent;
+import com.ote.mandate.business.command.spi.IEventRepository;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

@@ -1,6 +1,6 @@
 package com.ote.mandate.service.event;
 
-import com.ote.framework.IEvent;
+import com.ote.common.cqrs.IEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;

@@ -1,7 +1,7 @@
 package com.ote.mandate.service.event;
 
-import com.ote.framework.IEvent;
-import com.ote.mandate.business.spi.IEventRepository;
+import com.ote.common.cqrs.IEvent;
+import com.ote.mandate.business.command.spi.IEventRepository;
 import com.ote.mandate.service.event.model.EventDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,13 +1,13 @@
 package com.ote.mandate.business;
 
-import com.ote.mandate.business.api.IMandateCommandService;
-import com.ote.mandate.business.api.MandateServiceProvider;
-import com.ote.mandate.business.model.aggregate.*;
-import com.ote.mandate.business.model.command.*;
-import com.ote.mandate.business.model.event.MandateCreatedEvent;
-import com.ote.mandate.business.model.event.MandateHeirAddedEvent;
-import com.ote.mandate.business.model.event.MandateMainHeirDefinedEvent;
-import com.ote.mandate.business.model.event.MandateNotaryDefinedEvent;
+import com.ote.mandate.business.aggregate.*;
+import com.ote.mandate.business.command.api.IMandateCommandHandler;
+import com.ote.mandate.business.command.api.MandateCommandHandlerProvider;
+import com.ote.mandate.business.command.model.*;
+import com.ote.mandate.business.event.model.MandateCreatedEvent;
+import com.ote.mandate.business.event.model.MandateHeirAddedEvent;
+import com.ote.mandate.business.event.model.MandateMainHeirDefinedEvent;
+import com.ote.mandate.business.event.model.MandateNotaryDefinedEvent;
 import cucumber.api.java.After;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -40,7 +40,7 @@ public class MandateServiceStepDefinitions {
 
     private EventRepositoryMock eventRepository = new EventRepositoryMock();
 
-    private IMandateCommandService mandateService = MandateServiceProvider.getInstance().getFactory().createService(eventRepository);
+    private IMandateCommandHandler mandateService = MandateCommandHandlerProvider.getInstance().getHandlerFactory().createService(eventRepository);
 
     private final ScenarioContext scenarioContext = new ScenarioContext();
 

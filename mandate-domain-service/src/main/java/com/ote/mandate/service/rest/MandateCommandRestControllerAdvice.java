@@ -1,8 +1,8 @@
 package com.ote.mandate.service.rest;
 
-import com.ote.mandate.business.exception.MalformedCommandException;
-import com.ote.mandate.business.exception.MandateAlreadyCreatedException;
-import com.ote.mandate.business.exception.MandateNotYetCreatedException;
+import com.ote.mandate.business.command.exception.MalformedCommandException;
+import com.ote.mandate.business.command.exception.MandateAlreadyCreatedException;
+import com.ote.mandate.business.command.exception.MandateNotYetCreatedException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

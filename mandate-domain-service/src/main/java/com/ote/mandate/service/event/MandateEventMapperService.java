@@ -1,9 +1,9 @@
 package com.ote.mandate.service.event;
 
-import com.ote.framework.Convertor;
-import com.ote.framework.IEvent;
-import com.ote.mandate.business.model.aggregate.Mandate;
-import com.ote.mandate.business.model.event.*;
+import com.ote.common.Convertor;
+import com.ote.common.cqrs.IEvent;
+import com.ote.mandate.business.aggregate.Mandate;
+import com.ote.mandate.business.event.model.*;
 import com.ote.mandate.service.event.model.*;
 import lombok.Getter;
 import org.springframework.stereotype.Service;

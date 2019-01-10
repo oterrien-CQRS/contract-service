@@ -1,12 +1,12 @@
 package com.ote.mandate.business;
 
-import com.ote.mandate.business.api.IMandateCommandService;
-import com.ote.mandate.business.api.MandateServiceProvider;
-import com.ote.mandate.business.exception.MandateAlreadyCreatedException;
-import com.ote.mandate.business.exception.MandateNotYetCreatedException;
-import com.ote.mandate.business.model.aggregate.*;
-import com.ote.mandate.business.model.command.*;
-import com.ote.mandate.business.model.event.*;
+import com.ote.mandate.business.aggregate.*;
+import com.ote.mandate.business.command.api.IMandateCommandHandler;
+import com.ote.mandate.business.command.api.MandateCommandHandlerProvider;
+import com.ote.mandate.business.command.exception.MandateAlreadyCreatedException;
+import com.ote.mandate.business.command.exception.MandateNotYetCreatedException;
+import com.ote.mandate.business.command.model.*;
+import com.ote.mandate.business.event.model.*;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Before;
@@ -28,7 +28,7 @@ public class MandateServiceTest {
     @Spy
     private EventRepositoryMock eventRepository = new EventRepositoryMock();
 
-    private IMandateCommandService mandateService = MandateServiceProvider.getInstance().getFactory().createService(eventRepository);
+    private IMandateCommandHandler mandateService = MandateCommandHandlerProvider.getInstance().getHandlerFactory().createService(eventRepository);
 
     @Before
     public void setUp() {

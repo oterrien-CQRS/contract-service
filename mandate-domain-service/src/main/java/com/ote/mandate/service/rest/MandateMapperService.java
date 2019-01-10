@@ -1,9 +1,9 @@
 package com.ote.mandate.service.rest;
 
-import com.ote.mandate.business.model.aggregate.Contractor;
-import com.ote.mandate.business.model.aggregate.Heir;
-import com.ote.mandate.business.model.aggregate.Mandate;
-import com.ote.mandate.business.model.aggregate.Notary;
+import com.ote.mandate.business.aggregate.Contractor;
+import com.ote.mandate.business.aggregate.Heir;
+import com.ote.mandate.business.aggregate.Mandate;
+import com.ote.mandate.business.aggregate.Notary;
 import com.ote.mandate.service.rest.payload.ContractorPayload;
 import com.ote.mandate.service.rest.payload.HeirPayload;
 import com.ote.mandate.service.rest.payload.MandatePayload;

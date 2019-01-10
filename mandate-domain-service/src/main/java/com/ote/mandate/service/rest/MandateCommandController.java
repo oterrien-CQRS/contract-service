@@ -1,7 +1,7 @@
 package com.ote.mandate.service.rest;
 
-import com.ote.mandate.business.api.IMandateCommandService;
-import com.ote.mandate.business.model.command.*;
+import com.ote.mandate.business.command.api.IMandateCommandHandler;
+import com.ote.mandate.business.command.model.*;
 import com.ote.mandate.service.rest.payload.HeirPayload;
 import com.ote.mandate.service.rest.payload.MandatePayload;
 import com.ote.mandate.service.rest.payload.NotaryPayload;
@@ -25,11 +25,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MandateCommandController {
 
-    private final IMandateCommandService mandateCommandService;
+    private final IMandateCommandHandler mandateCommandService;
 
     private final MandateMapperService mandateMapperService;
 
-    public MandateCommandController(@Autowired IMandateCommandService mandateCommandService,
+    public MandateCommandController(@Autowired IMandateCommandHandler mandateCommandService,
                                     @Autowired MandateMapperService mandateMapperService) {
         this.mandateCommandService = mandateCommandService;
         this.mandateMapperService = mandateMapperService;

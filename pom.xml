@@ -12,6 +12,8 @@
     <description>Contract CQRS</description>
 
     <modules>
+        <module>common</module>
+        <module>cqrs-common</module>
         <module>mandate-domain</module>
         <module>mandate-domain-service</module>
         <module>contract-domain-service</module>
