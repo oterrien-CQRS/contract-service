@@ -5,25 +5,40 @@ Feature: create a mandate
   We will create and update mandate
 
   Scenario: a client should be able to create a succession mandate
-    Given a client named "Alfred"
-    And his main heir is "Katy"
-    And hist other heirs are :
+    Given I am "Alfred"
+    And I have designed "Katy" as my main heir
+    And I have designed following people as other heirs:
       | Leon |
       | Brad |
-    And his notary is "Master"
-    When this client grants bank "Neuflize" to operate succession when he will die
+    And my notary is "Master Langlois"
+    When I want to sign succession contract with my bank
     Then a mandate is created
 
-  Scenario Outline: a client should be able to amend the notary
-    Given a client named "Alfred"
-    And a succession mandate with id "5412EDDF"
-    And <FIELD> is equal to <OLD>
-    When this client set the <FIELD> to "<NEW>"
-    Then the mandate is amended in consequence
+  Scenario Outline: a client should be able to amend the mandate
+    Given I am "Alfred"
+    And I have signed a succession mandate with id "5412EDD"
+    And "<FIELD>" is set with "<OLD>"
+    When I want to amend the "<FIELD>" to "<NEW>"
+    Then "<FIELD>" is equal to "<NEW>"
 
     Examples:
-      | FIELD      | OLD        | NEW        |
-      | Notary     |            | Master     |
-      | MainHeir   |            | Katy       |
-      | OtherHeirs | Leon       | Leon, Brad |
-      | OtherHeirs | Leon, Brad | Leon       |
+      | FIELD      | OLD           | NEW             |
+      | Notary     | Master Nobody | Master Langlois |
+      | Notary     |               | Master Langlois |
+      | MainHeir   | Gertrude      | Katy            |
+      | MainHeir   |               | Katy            |
+      | OtherHeirs | Leon          | Leon, Brad      |
+      | OtherHeirs | Leon, Brad    | Leon            |
+
+  Scenario Outline: a client should be able to amend the mandate with existing values
+    Given I am "Alfred"
+    And I have signed a succession mandate with id "5412EDD"
+    And "<FIELD>" is set with "<OLD>"
+    When I want to amend the "<FIELD>" to "<NEW>"
+    Then "<FIELD>" is equal to "<NEW>"
+
+    Examples:
+      | FIELD      | OLD             | NEW             |
+      | Notary     | Master Langlois | Master Langlois |
+      | MainHeir   | Katy            | Katy            |
+      | OtherHeirs | Leon, Brad      | Leon, Brad      |
